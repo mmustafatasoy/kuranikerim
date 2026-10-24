@@ -2,7 +2,18 @@
 
 **Android 8.0 (API 26) ve üstünü hedefleyen Türkçe, çevrimdışı Kur'an okuyucu.**
 
-## Yeni sürüm v0.4.0 — gerçek Kur’an fontu ve düzeltilmiş ayet düzeni
+## Yeni sürüm v0.5.0 — referans ekranlar ve Android sistem çubukları
+
+- Kullanıcının verdiği referans görsel temel alınarak 114 sure listesi, beyaz mushaf ekranı, renkli büyük Amiri Quran yazıları, aktif ayet-meal vurgusu, yeşil sabit oynatıcı, alt menü ve ayet ayarları paneli gerçek Compose bileşenleri olarak kuruldu.
+- Android 8–16: enableEdgeToEdge + safeDrawing güvenli boşlukları; üstte saat, SIM, şarj ve altta hareket/gezinti alanları hiçbir ana bileşeni örtmez. Tam ekran/sistem barları üzerine uzanma düzeltilmiştir.
+- Sure arama, Mekke/Medine filtresi, ayet seçme, ayet yer imi, okuma boyutu ve Türkçe meal kontrolü.
+- Ayar tercihlerinin kalıcı depolanması; desteklenen hafızlar: Alafasy, Sudais, Husary, Minshawi.
+- Gerçek Media3 oynatma, süre çubuğu ile ileri/geri sarma, hız değiştirme, tekrar ve otomatik sonraki ayet kontrolü.
+- **Henüz yok:** Harf/kelime sesi, doğru tecvid renk algoritması ve lisanslı otomatik indirme. Bunlar sahte çalışan düğmelerle temsil edilmez.
+- Varsayılan çevrimiçi ses kalitesi, sağlayıcının tanımladığı hafız sürümüne uygun olarak seçilir.
+- Gerçek cihazda piksel karşılaştırması, farklı ekran kesikleri ve gezinme biçimleri için ek saha testi gerekmektedir.
+
+## Önceki sürüm v0.4.0 — gerçek Kur’an fontu ve düzeltilmiş ayet düzeni
 
 - Referans görsele uygun beyaz okuma sayfası, zümrüt yeşili başlık, altın süslemeler, canlı renkli büyük Arapça kelimeler ve Türkçe meal.
 - **Amiri Quran** hattatlık yazı tipi (Google Fonts, SIL Open Font License 1.1), Android APK derlemesinde güvenilir kaynak ve Git hash kontrolüyle gömülür; internet olmadan da Arapça font çalışır.
