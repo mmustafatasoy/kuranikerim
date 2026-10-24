@@ -1,8 +1,8 @@
 package com.nur.quran
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,29 +17,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
-private val Green = Color(0xFF005447)
-private val Gold = Color(0xFFD8A642)
-private val Red = Color(0xFFE82B35)
-private val WhitePaper = Color(0xFFFFFCF7)
-private val WordColors = listOf(
-    Color(0xFFE34D1A), Color(0xFF056CEB), Color(0xFF059C46),
-    Color(0xFF9C19CF), Color(0xFFDF1884), Color(0xFF008FAD),
-    Color(0xFFD58D00)
+private val Emerald = Color(0xFF005046)
+private val DarkEmerald = Color(0xFF003F37)
+private val Gold = Color(0xFFD6A53C)
+private val Red = Color(0xFFE52A2E)
+private val WhitePaper = Color(0xFFFFFDFA)
+private val SurahFont = FontFamily(Font(R.font.amiri_quran))
+private val Colors = listOf(
+    Color(0xFFDD4317), Color(0xFF116BDF), Color(0xFF159137),
+    Color(0xFF9F21BA), Color(0xFFE01983), Color(0xFF007FAC),
+    Color(0xFFD18A00)
 )
 
 /**
- * White Quran page inspired by user's reference. Red means currently playing
- * AYAH, not a fictional millisecond-accurate word/letter timestamp.
+ * Readable, traditional Qur'anic Naskh letterforms via Amiri Quran (OFL 1.1).
+ * The source Arabic ayah content is NEVER reconstructed from an image.
+ * Audio emphasis is verse-accurate, not fabricated character timestamps.
  */
 @Composable
 fun PremiumReaderScreen(
@@ -56,225 +67,366 @@ fun PremiumReaderScreen(
             ?.coerceIn(1, surah.ayahCount) ?: 1
     }
     val scroll = rememberLazyListState(initialFirstVisibleItemIndex = saved - 1)
-    var playingAyah by remember(surah.number) { mutableIntStateOf(0) }
+    var playedAyah by remember(surah.number) { mutableIntStateOf(0) }
     var soundPlaying by remember(surah.number) { mutableStateOf(false) }
-    var requested by remember(surah.number) { mutableIntStateOf(saved) }
+    var requestedAyah by remember(surah.number) { mutableIntStateOf(saved) }
     var playRequest by remember(surah.number) { mutableIntStateOf(0) }
     var bookmarkRevision by remember(surah.number) { mutableIntStateOf(0) }
-    var showMeal by remember(surah.number) { mutableStateOf(true) }
+    var mealVisible by remember(surah.number) { mutableStateOf(true) }
     var showMp3 by remember(surah.number) { mutableStateOf(false) }
+    var settingsOpen by remember { mutableStateOf(false) }
     var meal by remember(surah.number) { mutableStateOf<List<String>?>(null) }
     var mealError by remember(surah.number) { mutableStateOf(false) }
     var retry by remember(surah.number) { mutableIntStateOf(0) }
-    var jumpTo by remember(surah.number) { mutableIntStateOf(0) }
+    var bookmarkTarget by remember(surah.number) { mutableIntStateOf(0) }
 
     LaunchedEffect(surah.number, retry) {
         mealError = false
         try {
             meal = TurkishMealRepository(context.applicationContext)
                 .surah(surah.number, surah.ayahCount)
-        } catch (_: Exception) { mealError = true }
+        } catch (_: Exception) {
+            mealError = true
+        }
     }
+    // Save the actual visible verse. Scrolling the Quran does not lose progress.
     LaunchedEffect(surah.number, scroll) {
-        snapshotFlow { scroll.firstVisibleItemIndex }.distinctUntilChanged().collect { index ->
-            store.savePosition(surah.number, (index + 1).coerceIn(1, surah.ayahCount))
+        snapshotFlow { scroll.firstVisibleItemIndex }.distinctUntilChanged().collect { position ->
+            store.savePosition(surah.number, (position + 1).coerceIn(1, surah.ayahCount))
         }
     }
-    LaunchedEffect(playingAyah, soundPlaying) {
-        if (soundPlaying && playingAyah in 1..surah.ayahCount) {
-            scroll.animateScrollToItem(playingAyah - 1)
+    LaunchedEffect(playedAyah, soundPlaying) {
+        if (soundPlaying && playedAyah in 1..surah.ayahCount) {
+            scroll.animateScrollToItem(playedAyah - 1)
         }
     }
-    LaunchedEffect(jumpTo) {
-        if (jumpTo in 1..surah.ayahCount) scroll.animateScrollToItem(jumpTo - 1)
+    LaunchedEffect(bookmarkTarget) {
+        if (bookmarkTarget in 1..surah.ayahCount) scroll.animateScrollToItem(bookmarkTarget - 1)
     }
 
     Column(Modifier.fillMaxSize().background(WhitePaper)) {
+        // The white page and emerald header follow the reference screenshot.
         Row(
             modifier = Modifier.fillMaxWidth().background(
-                Brush.horizontalGradient(listOf(Color(0xFF003D36), Color(0xFF09836B)))
-            ).padding(vertical = 8.dp, horizontal = 6.dp),
+                Brush.horizontalGradient(listOf(DarkEmerald, Color(0xFF087662)))
+            ).padding(horizontal = 5.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
                 Icon(Icons.Default.ArrowBack, "Geri", tint = Color.White)
             }
-            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(surah.turkishName.uppercase() + " SURESİ",
-                    color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                    color = Color.White, fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold, maxLines = 1)
                 Text(surah.number.toString() + ". Sure • " + surah.ayahCount + " Ayet",
-                    color = Color(0xFFDDF1E6), fontSize = 12.sp)
+                    color = Color(0xFFDEF3E8), fontSize = 12.sp)
             }
-            IconButton(onClick = { showMeal = !showMeal }) {
-                Icon(Icons.Default.Translate, "Meali göster veya gizle", tint = Color.White)
+            IconButton(onClick = {
+                val target = (scroll.firstVisibleItemIndex + 1).coerceIn(1, surah.ayahCount)
+                store.toggleBookmark(surah.number, target)
+                bookmarkRevision++
+            }) {
+                Icon(Icons.Default.BookmarkBorder, "Görünen ayeti kaydet", tint = Gold)
+            }
+            IconButton(onClick = { settingsOpen = true }) {
+                Icon(Icons.Default.Settings, "Ayarlar", tint = Color.White)
             }
         }
-        Column(
-            Modifier.fillMaxWidth().background(Color(0xFFFFF6E6))
-                .padding(horizontal = 8.dp, vertical = 5.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("✦ ۞ ✦", color = Gold, fontSize = 23.sp)
-            Text(surah.arabicName, color = Green, fontSize = 35.sp,
-                style = TextStyle(textDirection = TextDirection.Rtl))
-            Text(surah.turkishName + " Suresi", color = Green, fontSize = 13.sp)
-            HorizontalDivider(color = Gold, thickness = 1.dp)
-        }
-        if (showMeal && meal == null) {
-            Row(Modifier.fillMaxWidth().padding(9.dp), verticalAlignment = Alignment.CenterVertically) {
+
+        QuranSurahBanner(surah)
+
+        if (mealVisible && meal == null) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 3.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 if (mealError) {
-                    Text("Meal yüklenemedi; internet bağlantısını kontrol et.",
+                    Text("Türkçe meal alınamadı. Bağlantını kontrol et.",
                         color = Red, fontSize = 12.sp, modifier = Modifier.weight(1f))
                     TextButton(onClick = { retry++ }) { Text("Yenile") }
                 } else {
-                    CircularProgressIndicator(Modifier.size(15.dp), strokeWidth = 2.dp)
-                    Spacer(Modifier.size(7.dp))
-                    Text("Türkçe meal yükleniyor…", color = Green, fontSize = 12.sp)
+                    CircularProgressIndicator(Modifier.size(15.dp),
+                        strokeWidth = 2.dp, color = Emerald)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Türkçe meal yükleniyor", color = Emerald, fontSize = 12.sp)
                 }
             }
         }
+
         LazyColumn(
             state = scroll, modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(start = 9.dp, end = 9.dp, top = 8.dp, bottom = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             itemsIndexed(surah.verses, key = { index, _ -> index }) { index, arabic ->
-                val ayah = index + 1
-                val active = soundPlaying && playingAyah == ayah
-                val hasBookmark = remember(bookmarkRevision, ayah) {
-                    store.hasBookmark(surah.number, ayah)
+                val number = index + 1
+                val active = soundPlaying && playedAyah == number
+                val bookmark = remember(bookmarkRevision, number) {
+                    store.hasBookmark(surah.number, number)
                 }
                 Surface(
-                    color = if (active) Color(0xFFFFE9E8) else Color.White,
-                    shape = RoundedCornerShape(17.dp),
-                    shadowElevation = 2.dp,
-                    border = BorderStroke(if (active) 1.5.dp else 0.6.dp,
-                        if (active) Red else Color(0xFFE7D6A7))
+                    shape = RoundedCornerShape(15.dp),
+                    color = if (active) Color(0xFFFFE8E5) else Color.White,
+                    border = BorderStroke(if (active) 1.5.dp else 0.5.dp,
+                        if (active) Color(0xFFFF9791) else Color(0xFFF1E7D7))
                 ) {
                     Column(
-                        Modifier.fillMaxWidth().padding(horizontal = 11.dp, vertical = 7.dp),
-                        verticalArrangement = Arrangement.spacedBy(5.dp)
+                        Modifier.fillMaxWidth().padding(horizontal = 11.dp, vertical = 9.dp),
+                        verticalArrangement = Arrangement.spacedBy(1.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                color = if (active) Color(0xFFFFD3D1) else Color(0xFFFFF0C7),
-                                shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, if (active) Red else Gold)
-                            ) {
-                                Text(ayah.toString(),
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    color = if (active) Red else Green,
-                                    fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                            }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(7.dp)
+                        ) {
+                            AyahMedallion(number, active)
                             Spacer(Modifier.weight(1f))
-                            if (active) Text("● OKUNUYOR", color = Red, fontSize = 11.sp)
-                            IconButton(onClick = { requested = ayah; playRequest++ }) {
-                                Icon(Icons.Default.PlayCircle, "Ayeti sesli oku",
-                                    tint = if (active) Red else Green)
+                            if (active) Text("● OKUNUYOR", color = Red, fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold)
+                            IconButton(
+                                modifier = Modifier.size(40.dp),
+                                onClick = { requestedAyah = number; playRequest++ }
+                            ) {
+                                Icon(Icons.Default.PlayCircle, "Bu ayeti sesli oku",
+                                    tint = if (active) Red else Emerald, modifier = Modifier.size(30.dp))
                             }
-                            IconButton(onClick = {
-                                store.toggleBookmark(surah.number, ayah); bookmarkRevision++
-                            }) {
-                                Icon(if (hasBookmark) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                    "Yer imi", tint = if (hasBookmark) Gold else Green)
+                            IconButton(
+                                modifier = Modifier.size(40.dp),
+                                onClick = {
+                                    store.toggleBookmark(surah.number, number)
+                                    bookmarkRevision++
+                                }
+                            ) {
+                                Icon(if (bookmark) Icons.Default.Bookmark
+                                     else Icons.Default.BookmarkBorder,
+                                    "Yer imi", tint = if (bookmark) Gold else Emerald)
                             }
                         }
-                        RainbowText(arabic, active, (fontSize + 10).coerceIn(36, 62))
-                        if (showMeal) {
-                            val translation = meal?.getOrNull(index)
-                            if (translation != null) {
-                                Text(translation,
-                                    modifier = Modifier.fillMaxWidth(),
+
+                        ColoredQuranVerse(
+                            arabic = arabic,
+                            playingVerse = active,
+                            size = (fontSize + 13).coerceIn(38, 65)
+                        )
+
+                        if (mealVisible) {
+                            meal?.getOrNull(index)?.let { sentence ->
+                                Text(
+                                    text = sentence,
+                                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                                    fontSize = 15.sp,
+                                    lineHeight = 22.sp,
                                     textAlign = TextAlign.Center,
-                                    fontSize = 17.sp,
-                                    lineHeight = 25.sp,
-                                    fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (active) Red else Color(0xFF435257))
-                            } else if (mealError) {
-                                Text("Meal henüz kullanılabilir değil.", fontSize = 11.sp,
-                                    color = Color.Gray)
+                                    color = if (active) Red else Color(0xFF435457),
+                                    fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
+                                )
                             }
                         }
-                        Text("✧", textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(), color = Gold)
+                        HorizontalDivider(
+                            color = if (active) Color(0xFFFFCBC4) else Color(0xFFF3E8D1),
+                            thickness = 0.5.dp
+                        )
                     }
                 }
             }
         }
+
+        if (showMp3) LocalAudioPanel(surah.number, store, false)
+
         AyahAudioPanel(
-            surah = surah, globalAyahOffset = globalAyahOffset,
-            store = store, dark = true, requestedAyah = requested,
+            surah = surah,
+            globalAyahOffset = globalAyahOffset,
+            store = store,
+            dark = true,
+            requestedAyah = requestedAyah,
             playNonce = playRequest,
-            onAyahChanged = { playingAyah = it },
+            onAyahChanged = { playedAyah = it },
             onPlayingChanged = { soundPlaying = it }
         )
+
+        // Working bottom controls rather than image-only icons.
         Row(
             Modifier.fillMaxWidth().background(Color.White)
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = 2.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            TextButton(onClick = onBack) {
-                Icon(Icons.Default.MenuBook, "Sureler", tint = Green)
-                Text(" Sureler", color = Green)
-            }
-            IconButton(onClick = { onFontSize((fontSize - 2).coerceAtLeast(24)) }) {
-                Icon(Icons.Default.Remove, "Harfleri küçült", tint = Green)
-            }
-            Text("Aa", color = Green, fontWeight = FontWeight.Bold)
-            IconButton(onClick = { onFontSize((fontSize + 2).coerceAtMost(52)) }) {
-                Icon(Icons.Default.Add, "Harfleri büyüt", tint = Green)
-            }
-            IconButton(onClick = {
-                jumpTo = store.bookmarks()
-                    .firstOrNull { it.startsWith(surah.number.toString() + ":") }
-                    ?.substringAfter(":")?.toIntOrNull() ?: 0
-            }) {
-                Icon(Icons.Default.Bookmarks, "Yer imine git", tint = Gold)
-            }
+            ReaderTab(Icons.Default.MenuBook, "Kur’an", onClick = {
+                bookmarkTarget = 1
+            }, selected = true)
+            ReaderTab(Icons.Default.List, "Sureler", onClick = onBack)
+            ReaderTab(Icons.Default.Search, "Ara", onClick = onBack)
+            ReaderTab(Icons.Default.Bookmarks, "Yer İmleri", onClick = {
+                bookmarkTarget = store.bookmarks().firstOrNull {
+                    it.startsWith(surah.number.toString() + ":")
+                }?.substringAfter(":")?.toIntOrNull() ?: 0
+            })
+            ReaderTab(Icons.Default.Settings, "Ayarlar", onClick = { settingsOpen = true })
         }
-        TextButton(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            onClick = { showMp3 = !showMp3 }
-        ) {
-            Text(if (showMp3) "MP3 panelini gizle" else "Çevrimdışı yerel MP3 aç",
-                color = Green, fontSize = 11.sp)
-        }
-        if (showMp3) LocalAudioPanel(surah.number, store, false)
+    }
+
+    if (settingsOpen) {
+        AlertDialog(
+            onDismissRequest = { settingsOpen = false },
+            title = { Text("Kur’an okuma ayarları") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Büyük geleneksel Amiri Quran yazısı")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { onFontSize((fontSize - 2).coerceAtLeast(24)) }) {
+                            Icon(Icons.Default.Remove, "Küçült")
+                        }
+                        Text("Arapça boyutu: " + (fontSize + 13).coerceIn(38, 65),
+                            modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                        IconButton(onClick = { onFontSize((fontSize + 2).coerceAtMost(52)) }) {
+                            Icon(Icons.Default.Add, "Büyüt")
+                        }
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Türkçe meal göster", modifier = Modifier.weight(1f))
+                        Switch(checked = mealVisible, onCheckedChange = { mealVisible = it })
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Yerel MP3 paneli", modifier = Modifier.weight(1f))
+                        Switch(checked = showMp3, onCheckedChange = { showMp3 = it })
+                    }
+                    Text("Kırmızı vurgu kıraat sırasında aktif ayeti belirtir. " +
+                         "Harf zamanlaması henüz bulunmuyor.", fontSize = 12.sp)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { settingsOpen = false }) { Text("Tamam") }
+            }
+        )
     }
 }
 
 @Composable
-private fun RainbowText(arabic: String, playingVerse: Boolean, size: Int) {
-    var selectedWord by remember(arabic) { mutableIntStateOf(-1) }
-    var layout by remember(arabic) { mutableStateOf<TextLayoutResult?>(null) }
-    val words = remember(arabic) {
-        arabic.split(Regex("""\s+""")).filter { it.isNotEmpty() }
+private fun QuranSurahBanner(surah: Surah) {
+    Column(
+        Modifier.fillMaxWidth()
+            .background(Color(0xFFFFF8EA))
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("۞", color = Gold, fontSize = 29.sp)
+            Column(
+                Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(surah.arabicName, color = Emerald, fontFamily = SurahFont,
+                    fontSize = 29.sp, lineHeight = 43.sp,
+                    style = TextStyle(textDirection = TextDirection.Rtl))
+                Text(surah.turkishName.uppercase() + " SURESİ",
+                    color = Emerald, fontSize = 11.sp, letterSpacing = 1.sp)
+            }
+            Text("۞", color = Gold, fontSize = 29.sp)
+        }
+        // Fatiha: its numbered ayah 1 is already Basmala (do not duplicate).
+        // Tawbah: no Basmala. Other surahs: introductory, UNNUMBERED Basmala.
+        if (surah.openingBasmala != null) {
+            Text(surah.openingBasmala, color = Emerald,
+                fontFamily = SurahFont, fontSize = 26.sp, lineHeight = 41.sp,
+                textAlign = TextAlign.Center,
+                style = TextStyle(textDirection = TextDirection.Rtl),
+                modifier = Modifier.fillMaxWidth())
+        }
+        HorizontalDivider(color = Gold, thickness = 1.dp)
     }
-    val annotated = buildAnnotatedString {
+}
+
+@Composable
+private fun ReaderTab(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    selected: Boolean = false
+) {
+    TextButton(
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 3.dp),
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = if (selected) Color(0xFF007A5F) else Emerald
+        )
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(icon, label, modifier = Modifier.size(21.dp))
+            Text(label, fontSize = 9.sp, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun AyahMedallion(number: Int, isPlaying: Boolean) {
+    Box(Modifier.size(39.dp), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.fillMaxSize()) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val outer = size.minDimension * 0.49f
+            val inner = outer * 0.79f
+            val star = Path()
+            for (i in 0..16) {
+                val angle = (i * PI / 8 - PI / 2).toFloat()
+                val radius = if (i % 2 == 0) outer else inner
+                val x = cx + radius * cos(angle)
+                val y = cy + radius * sin(angle)
+                if (i == 0) star.moveTo(x, y) else star.lineTo(x, y)
+            }
+            star.close()
+            drawPath(star, color = if (isPlaying) Color(0xFFFFD8D3)
+                      else Color(0xFFFFF5D7))
+            drawPath(star, color = if (isPlaying) Red else Gold,
+                style = Stroke(width = 2.5f))
+        }
+        Text(number.toString(), fontSize = 15.sp, fontWeight = FontWeight.Bold,
+            color = if (isPlaying) Red else Emerald)
+    }
+}
+
+@Composable
+private fun ColoredQuranVerse(
+    arabic: String,
+    playingVerse: Boolean,
+    size: Int
+) {
+    var selectedWord by remember(arabic) { mutableIntStateOf(-1) }
+    var textLayout by remember(arabic) { mutableStateOf<TextLayoutResult?>(null) }
+    // Color complete Arabic words, not individual code points: do not break
+    // joining, diacritics, tashkeel, tajweed symbols or glyph shaping.
+    val words = remember(arabic) {
+        arabic.split(Regex("\\s+")).filter { it.isNotEmpty() }
+    }
+    val colored = buildAnnotatedString {
         words.forEachIndexed { index, word ->
             if (index != 0) append(" ")
             pushStringAnnotation(tag = "word", annotation = index.toString())
-            withStyle(SpanStyle(
-                color = if (playingVerse || index == selectedWord) Red
-                else WordColors[index % WordColors.size],
-                fontWeight = FontWeight.SemiBold
-            )) { append(word) }
+            withStyle(
+                SpanStyle(color = if (playingVerse || selectedWord == index) Red
+                                 else Colors[index % Colors.size])
+            ) { append(word) }
             pop()
         }
     }
     Text(
-        text = annotated,
-        modifier = Modifier.fillMaxWidth().pointerInput(arabic) {
-            detectTapGestures { position ->
-                val offset = layout?.getOffsetForPosition(position) ?: return@detectTapGestures
-                selectedWord = annotated.getStringAnnotations("word", offset, offset)
-                    .firstOrNull()?.item?.toIntOrNull() ?: -1
-            }
-        },
-        style = TextStyle(textDirection = TextDirection.Rtl),
+        text = colored,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp)
+            .pointerInput(arabic) {
+                detectTapGestures { point ->
+                    val index = textLayout?.getOffsetForPosition(point)
+                        ?: return@detectTapGestures
+                    selectedWord = colored.getStringAnnotations(
+                        tag = "word", start = index, end = index
+                    ).firstOrNull()?.item?.toIntOrNull() ?: -1
+                }
+            },
+        fontFamily = SurahFont,
+        fontSynthesis = FontSynthesis.None,
         fontSize = size.sp,
-        lineHeight = (size * 1.75f).sp,
+        lineHeight = (size * 1.7f).sp,
         textAlign = TextAlign.Center,
-        onTextLayout = { layout = it }
+        style = TextStyle(textDirection = TextDirection.Rtl),
+        onTextLayout = { textLayout = it }
     )
 }
