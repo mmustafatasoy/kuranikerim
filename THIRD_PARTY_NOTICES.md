@@ -33,3 +33,11 @@
 - Meal: Diyanet İşleri Başkanlığı Türkçe meal baskısı. İçeriğin hakları çeviri sahibine aittir.
 - Bu depoya toplu meal eklenmez. Kullanıcılar API ile alır, yalnızca kişisel çevrimdışı okuma için cihaz önbelleğinde kalır.
 - Renkli otomatik ses takibi: **ayet** seviyesinde; harf/kelime zamanlaması henüz bulunmuyor.
+
+## Amiri Quran (Google Fonts)
+- Family: Amiri Quran, traditional Qur'anic Naskh typeface.
+- Source: https://github.com/google/fonts/tree/main/ofl/amiriquran
+- Author: Amiri Quran Project Authors, © 2010–2022.
+- License: SIL Open Font License 1.1.
+- Full license: third_party/AmiriQuran-OFL.txt and app/src/main/assets/fonts/AmiriQuran-OFL.txt.
+- Binary font fetched at build from pinned Google Fonts commit and checked against Git blob SHA 2a4de2c4fd3e6fd23656586151935a98723acaff.

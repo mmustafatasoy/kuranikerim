@@ -2,7 +2,18 @@
 
 **Android 8.0 (API 26) ve üstünü hedefleyen Türkçe, çevrimdışı Kur'an okuyucu.**
 
-## Yeni sürüm (v0.3.0) — Renkli Arapça / Türkçe meal
+## Yeni sürüm v0.4.0 — gerçek Kur’an fontu ve düzeltilmiş ayet düzeni
+
+- Referans görsele uygun beyaz okuma sayfası, zümrüt yeşili başlık, altın süslemeler, canlı renkli büyük Arapça kelimeler ve Türkçe meal.
+- **Amiri Quran** hattatlık yazı tipi (Google Fonts, SIL Open Font License 1.1), Android APK derlemesinde güvenilir kaynak ve Git hash kontrolüyle gömülür; internet olmadan da Arapça font çalışır.
+- Bazı Tanzil metin dışa aktarımlarında sure girişindeki **ayet dışı besmele**, 2:1 gibi ilk ayetin aynı satırında bulunur. Yeni ayrıştırıcı besmeleyi süslü başlıkta ayrı gösterir; Bakara 2:1 yalnızca Elif Lâm Mîm ayetidir.
+- Fâtiha 1:1 ayeti besmeledir; iki kez gösterilmez. Tevbe başına besmele eklenmez.
+- Okunan ayette Arapça ve Türkçe birlikte kırmızı, kelimeye elle dokunulduğunda seçilen kelime kırmızı. Otomatik kelime/harf zamanlaması henüz yoktur.
+- Alt şeritte surelere git, görünür ayeti kaydet, yer imine geç, okumayı büyüt, meali gizle/göster ve arka plan ses kontrolü.
+- **Font derlemesi ilk seferde internet gerektirir.** Amiri Quran lisansı `third_party/AmiriQuran-OFL.txt` ve APK içindeki `assets/fonts/AmiriQuran-OFL.txt` dosyasında saklanır.
+- Test: `./gradlew :app:testDebugUnitTest :app:assembleDebug`.
+
+## Önceki sürüm (v0.3.0) — Renkli Arapça / Türkçe meal
 - Beyaz ve fildişi zeminde büyük, çok renkli Arapça metin.
 - Kıraat sırasında **aktif ayet** ve onun Türkçe meali aynı anda kırmızı vurgulanır.
 - Kullanıcı kelimeye dokunduğunda seçilen Arapça kelime kırmızı görünür.
