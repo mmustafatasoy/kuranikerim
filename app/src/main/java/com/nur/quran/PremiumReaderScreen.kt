@@ -205,7 +205,7 @@ fun PremiumReaderScreen(
                                     modifier=Modifier.size(20.dp))
                             }
                         }
-                        RefColoredArabic(ayahText,settings,redLetter)
+                        RefColoredArabic(ayahText,settings,redLetter,active)
                         if(settings.mealVisible) {
                             meal?.getOrNull(index)?.let { translation ->
                                 Text(translation,
@@ -346,7 +346,8 @@ private fun RefFloralMotif(modifier:Modifier=Modifier) {
 private fun RefColoredArabic(
     text: String,
     settings: RefReadingSettings,
-    activeLetter: Int
+    activeLetter: Int,
+    voiceActive: Boolean
 ) {
     var selected by remember(text) { mutableIntStateOf(-1) }
     var layout by remember(text) { mutableStateOf<TextLayoutResult?>(null) }
@@ -357,7 +358,7 @@ private fun RefColoredArabic(
             pushStringAnnotation("glyph", index.toString())
             val tint = when {
                 activeLetter >= 0 && activeLetter == index -> RefRed
-                activeLetter == -1 && selected == index -> RefRed
+                !voiceActive && activeLetter == -1 && selected == index -> RefRed
                 settings.colored -> RefPalette[glyph.wordIndex % RefPalette.size]
                 else -> RefDark
             }
