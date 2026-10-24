@@ -109,6 +109,13 @@ fun PremiumReaderScreen(
             onSettings={settingsOpen=true}
         )
         RefSurahBanner(surah)
+        if (settings.mealVisible) {
+            Text(
+                "Türkçe meal: Şaban Piriş • QuranEnc.com",
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 1.dp),
+                fontSize = 10.sp, color = RefGreen, textAlign = TextAlign.End
+            )
+        }
         if(searchOpen) {
             Row(Modifier.fillMaxWidth().padding(horizontal=9.dp),
                 verticalAlignment=Alignment.CenterVertically) {
