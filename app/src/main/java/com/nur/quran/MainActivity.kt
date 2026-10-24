@@ -102,8 +102,7 @@ private fun NurApp() {
                             store = store,
                             fontSize = fontSize,
                             onFontSize = { fontSize = it; store.setFontSize(it) },
-                            onBack = { readingSurah = 0 },
-                            dark = dark
+                            onBack = { readingSurah = 0 }
                         )
                     }
                 } else {
