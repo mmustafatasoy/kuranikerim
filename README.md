@@ -39,6 +39,14 @@ Depoda bu dört secret tanımlı değilse otomatik yayın işi güvenlik nedeniy
 
 Bu güncelleme sistemi doğrudan GitHub APK dağıtımı içindir. Google Play dağıtımı yapılacaksa mağazanın uygulama içi güncelleme altyapısı kullanılmalı, Play'in REQUEST_INSTALL_PACKAGES kurallarına uyulmalıdır. Android kullanıcı onayı olmadan sessiz APK yüklemesi yapılmaz.
 
+## NUR v0.8.0 — Uygulama içi GitHub güncellemeleri
+
+- Uygulama yeni kararlı GitHub Release sürümünü açılışta kontrol eder; Ayarlar → Güncellemeleri kontrol et seçeneğiyle manuel kontrol mümkündür.
+- Yalnızca doğrulanmış repo URL'sindeki nur-release.apk indirilir. APK SHA-256 özeti, paket kimliği ve artan sürüm numarası karşılaştırılır, Android kurulum onayı gerekir.
+- Resmî imzalı APK'yı yayımlamak için yayın keystore'u ve GitHub Actions secret'ları gerekir: [Kurulum rehberi](docs/RELEASE_SETUP.md).
+- Önceden yüklenmiş GitHub debug APK'larının imzası değişebileceğinden ilk resmî sürüme geçişte yeniden kurulum gerekebilir ve eski kayıtlar kaybolabilir. Sonraki tüm güncellemeler aynı yayın sertifikasıyla yapılmalıdır.
+- İlk resmî GitHub Release yayımlanana kadar sürüm güncellemesi bildirimi görülmez.
+
 ## NUR v0.7.0 — Arapça hat, premium ana sayfa, İbadet Rehberi ve çevrimdışı kıraat
 
 - Sure başlıklarının iki yanında geleneksel Amiri Quran yazı tipinde **الله** ve **محمد** yazılı süslü madalyonlar yer alır. Arabesk halka yavaşça döner, Arapça hat yazıları sabittir.
