@@ -135,7 +135,7 @@ internal class NurUpdateManager(context: Context) {
         if (phase == UpdatePhase.DOWNLOADING || phase == UpdatePhase.VERIFYING) return false
         return try {
             val folder = File(app.getExternalFilesDir(null), "updates")
-            check(folder.isDirectory || folder.mkdirs())
+            kotlin.check(folder.isDirectory || folder.mkdirs())
             val target = File(folder, "nur-" + version.tag.removePrefix("v") + ".apk")
             if (target.exists()) target.delete()
             val req = DownloadManager.Request(Uri.parse(version.url))
