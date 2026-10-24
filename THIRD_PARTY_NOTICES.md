@@ -27,12 +27,17 @@
 - Ayet sesleri uzaktan akış olarak dinlenir. Ses kayıtlarının telif hakları kendi hak sahiplerine aittir.
 - Kaynak dosyalar uygulama paketine veya bu depoya dahil edilmemiştir.
 
-## Türkçe meal / Turkish translation (tr.diyanet)
-- Kaynak: Al Quran Cloud API, https://api.alquran.cloud/v1/surah/1/tr.diyanet
-- Kullanım şartları: https://alquran.cloud/terms-and-conditions
-- Meal: Diyanet İşleri Başkanlığı Türkçe meal baskısı. İçeriğin hakları çeviri sahibine aittir.
-- Bu depoya toplu meal eklenmez. Kullanıcılar API ile alır, yalnızca kişisel çevrimdışı okuma için cihaz önbelleğinde kalır.
-- Renkli otomatik ses takibi: **ayet** seviyesinde; harf/kelime zamanlaması henüz bulunmuyor.
+## Ayet bazlı Türkçe meal — Şaban Piriş (QuranEnc)
+- Eski kaynak `tr.diyanet` bazı mealleri ayet gruplarına göre verir (ör. Nâs 1–6 tek meal); bunları her ayette tekrar etme hatası v0.5.1 ile düzeltildi.
+- Yeni çeviri: **Şaban Piriş Türkçe tercümesi**, kaynağı ve yayıncısı **QuranEnc.com**.
+- Kaynak: https://quranenc.com/tr/browse/turkish_shaban
+- API: https://quranenc.com/api/v1/translation/sura/turkish_shaban/114
+- Kullanım şartları: https://quranenc.com/en/home/api
+- Güncel sürüm/versiyon bilgisi: https://quranenc.com/api/v1/translations/list/tr (source maintains versions).
+- Metin ayet bazında kaynakta verildiği biçimiyle gösterilir; metne yorum eklenmez, ayet sırası ve sure numaraları ayrıca doğrulanır.
+- Kaynak verisi depoya eklenmez. Kullanıcı okurken API'den alınır, bireysel cihaz önbelleğinde tutulur; eski hatalı önbellek kesinlikle kullanılmaz.
+- QuranEnc lisansı: İçeriği değiştirmeme, kaynak ve yayıncıyı belirtme, güncel sürümü izleme ve uygunsuz reklam göstermeme koşulları vardır.
+- Otomatik kıraat takibi sadece ayet düzeyindedir, kelime/harf düzeyinde ses zamanlaması hazır değildir.
 
 ## Amiri Quran (Google Fonts)
 - Family: Amiri Quran, traditional Qur'anic Naskh typeface.

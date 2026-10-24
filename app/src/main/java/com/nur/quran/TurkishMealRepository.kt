@@ -87,9 +87,7 @@ class TurkishMealRepository(private val context: Context) {
             }
             row.getString("translation").trim().also { require(it.isNotBlank()) }
         }
-        require(expected == 1 || contents.distinct().size > 1) {
-            "Birleşik sure meali ayet bazında tekrar edilmiş; gösterilmeyecek"
-        }
+        AyahMealIntegrity.check(contents, expected)
         return contents
     }
 }

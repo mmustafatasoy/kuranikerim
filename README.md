@@ -2,7 +2,17 @@
 
 **Android 8.0 (API 26) ve üstünü hedefleyen Türkçe, çevrimdışı Kur'an okuyucu.**
 
-## Yeni sürüm v0.5.0 — referans ekranlar ve Android sistem çubukları
+## Hata düzeltmesi v0.5.1 — Nâs ve bütün surelerde ayet bazlı doğru Türkçe meal
+
+- Nâs suresinde 1–6 ayetlerinin tamamında aynı uzun Diyanet mealinin görünmesinin nedeni: `tr.diyanet` kaynağı bazı ayetleri toplu çevirmektedir.
+- Okuyucu meal kaynağı, **Şaban Piriş / QuranEnc `turkish_shaban`** ayet bazlı tercümesine geçirildi.
+- Her ayetin farklı doğru çevirisi, doğru sure ve ayet numarasına göre ayrı ayrı getirilip gösterilir.
+- Eksik, sırası karışmış veya tüm ayetlerde aynı toplu meal bulunan veri ekrana basılmaz.
+- Eski `tr.diyanet-v1` önbelleği hiç kullanılmaz. Yeni meal ilk kez internet üzerinden getirilir ve sonra cihazda saklanır.
+- Görsel tasarım, renkli Amiri Quran yazısı, kıraat oynatıcısı ve Android sistem çubuğu güvenli alanları korunur.
+- Kaynak ve şartlar: https://quranenc.com/tr/browse/turkish_shaban , https://quranenc.com/en/home/api
+
+## Önceki sürüm v0.5.0 — referans ekranlar ve Android sistem çubukları
 
 - Kullanıcının verdiği referans görsel temel alınarak 114 sure listesi, beyaz mushaf ekranı, renkli büyük Amiri Quran yazıları, aktif ayet-meal vurgusu, yeşil sabit oynatıcı, alt menü ve ayet ayarları paneli gerçek Compose bileşenleri olarak kuruldu.
 - Android 8–16: enableEdgeToEdge + safeDrawing güvenli boşlukları; üstte saat, SIM, şarj ve altta hareket/gezinti alanları hiçbir ana bileşeni örtmez. Tam ekran/sistem barları üzerine uzanma düzeltilmiştir.
