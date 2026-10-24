@@ -8,22 +8,30 @@ import androidx.media3.common.MediaMetadata
  * Stream only; the audio belongs to the recording's rightsholder.
  */
 object QuranAudioLinks {
-    fun url(globalAyah: Int): String {
+    fun url(globalAyah: Int, reciter: String = "ar.alafasy"): String {
         require(globalAyah in 1..6236) { "Global ayet indeksi 1..6236 olmalı" }
-        return "https://cdn.islamic.network/quran/audio/64/ar.alafasy/" + globalAyah + ".mp3"
+        val editions = mapOf(
+            "ar.alafasy" to 128,
+            "ar.sudais" to 192,
+            "ar.husary" to 128,
+            "ar.minshawi" to 128
+        )
+        val bitrate = requireNotNull(editions[reciter]) { "Unsupported reciter" }
+        return "https://cdn.islamic.network/quran/audio/" +
+            bitrate + "/" + reciter + "/" + globalAyah + ".mp3"
     }
 
-    fun playlist(surah: Surah, precedingAyahs: Int): List<MediaItem> {
+    fun playlist(surah: Surah, precedingAyahs: Int, reciter: String = "ar.alafasy"): List<MediaItem> {
         require(precedingAyahs >= 0 && precedingAyahs + surah.ayahCount <= 6236)
         return (1..surah.ayahCount).map { ayah ->
             val key = surah.number.toString() + ":" + ayah
             MediaItem.Builder()
-                .setUri(url(precedingAyahs + ayah))
+                .setUri(url(precedingAyahs + ayah, reciter))
                 .setMediaId(key)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
                         .setTitle(surah.turkishName + " • " + ayah + ". ayet")
-                        .setArtist("Mishary Rashid Alafasy")
+                        .setArtist(reciterLabel(reciter))
                         .build()
                 )
                 .build()
