@@ -140,10 +140,10 @@ private fun NurApp() {
                         bottomBar = {
                             NavigationBar(containerColor = card, windowInsets = WindowInsets(0, 0, 0, 0)) {
                                 listOf(
-                                    Triple("home", "Kur’an", Icons.Default.MenuBook),
-                                    Triple("quran", "Sureler", Icons.Default.List),
-                                    Triple("search", "Ara", Icons.Default.Search),
-                                    Triple("worship", "Namaz", Icons.Default.Explore),
+                                    Triple("home", "Ana Sayfa", Icons.Default.Home),
+                                    Triple("quran", "Kur’an", Icons.Default.MenuBook),
+                                    Triple("worship", "İbadet", Icons.Default.Mosque),
+                                    Triple("library", "Kütüphane", Icons.Default.LibraryBooks),
                                     Triple("settings", "Ayarlar", Icons.Default.Settings)
                                 ).forEach { (id, label, icon) ->
                                     NavigationBarItem(
@@ -166,17 +166,29 @@ private fun NurApp() {
                         Box(Modifier.fillMaxSize().padding(padding)) {
                             when (tab) {
                                 "home" -> PremiumHomeScreen(
-                                    store = store, repo = repository,
+                                    store = store, repo = repository, dark = dark,
                                     onContinue = { readingSurah = store.position().surah },
                                     onSurahList = { tab = "quran" },
                                     onLearn = { tab = "learn" },
                                     onWorship = { tab = "worship" },
+                                    onLibrary = { tab = "library" },
+                                    onSearch = { tab = "search" },
+                                    onUpdates = {
+                                        updateDialogOpen = true
+                                        updateScope.launch { updater.check(manual = true) }
+                                    },
+                                    onTheme = { dark = !dark; store.setDark(dark) },
                                     onShortSurah = { readingSurah = it }
                                 )
                                 "quran" -> ReferenceSurahListScreen(repository, onOpen = { readingSurah = it })
                                 "search" -> ReferenceSurahListScreen(repository, onOpen = { readingSurah = it }, focusSearch = true)
                                 "learn" -> LearningScreen(dark)
                                 "worship" -> WorshipGuideScreen(onOpenSurah = { readingSurah = it })
+                                "library" -> NurAudioLibraryScreen(
+                                    onOpenSurah = { readingSurah = it },
+                                    onAllSurahs = { tab = "quran" },
+                                    onSettings = { tab = "settings" }
+                                )
                                 else -> ReferenceAppSettings(
                                     dark = dark,
                                     onTheme = { dark = !dark; store.setDark(dark) },

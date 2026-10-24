@@ -13,8 +13,8 @@ android {
         applicationId = "com.nur.quran"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.8.0"
+        versionCode = 10
+        versionName = "0.9.0"
     }
     // Keep release signing credentials ONLY in GitHub Actions repository secrets.
     // No private key or password is committed to GitHub source control.
