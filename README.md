@@ -2,6 +2,20 @@
 
 **Android 8.0 (API 26) ve üstünü hedefleyen Türkçe, çevrimdışı Kur'an okuyucu.**
 
+## NUR v0.7.0 — Arapça hat, premium ana sayfa, İbadet Rehberi ve çevrimdışı kıraat
+
+- Sure başlıklarının iki yanında geleneksel Amiri Quran yazı tipinde **الله** ve **محمد** yazılı süslü madalyonlar yer alır. Arabesk halka yavaşça döner, Arapça hat yazıları sabittir.
+- Altın çerçeveli ve krem zeminli sure levhası, doğru besmele kuralını korur (Fâtiha 1:1 tekrar edilmez; Tevbe'de yoktur).
+- Yeni ana sayfa: devam et kartı, 114 sure, Elifba, İbadet Rehberi, çevrimdışı dinle ve dört kısa sure kısayolu.
+- İbadet Rehberi: abdest, iki rekât namaz, gusül, teyemmüm, namazda okunan dualar. İlk dersler ve okunuşları telefon içinde metin olarak bulunur; bilgiler Diyanet kaynaklarına dayanır ve Hanefî anlatım ağırlıklıdır.
+- **Harici MP3 dosyası seçme özelliği kaldırıldı.** Kıraat için ayrı uygulamaya veya dosya yöneticisine gitmek gerekmez.
+- **APK ile gelen ses paketi:** Mishary Rashid Alafasy 64 kbps, 22 ayet; Fâtiha (1:1–7), İhlâs (112:1–4), Felak (113:1–5), Nâs (114:1–6). Çevrimdışı başlangıç dinlemesi için internet gerekmez.
+- Diğer surelerde oynatıcıdan **Sureyi indir** işlemi ayet seslerini uygulamanın özel dizinine kaydeder. Daha sonra bağlantı olmadan dinlenir. Hafızlar ayrı saklanır ve yeterli depolama gerekir.
+- Çevrimdışı ses hakları kaynağı: https://alquran.cloud/terms-and-conditions . Ticari dağıtım planlanıyorsa hak sahipliği ve güncel şartlar ayrıca kontrol edilmelidir.
+- Türkçe mealin internetten ilk yüklenme şartı değişmemiştir; daha önce alınan mealler çevrimdışı açılır. İbadet metinleri çevrimdışı hazırdır.
+- İbadet rehberindeki bütün Arapça dualar için ayrı stüdyo sesleri henüz mevcut değildir. Hazır sesler belirtilen dört Kur’an suresine aittir; başka ses varmış gibi gösterilmez.
+- Android 8–16 ve sistem çubuklarına uyum, mevcut ayet harf takibi ve tüm kayıtlar korunur.
+
 ## Sesle harf eşleştirme v0.6.0
 
 - Okuma ekranına **harf eşleştirme** (kalem simgesi) eklendi. Ayeti dinlerken, sesin başladığı her harfi sırayla işaretleyip tamamını cihazda kaydedebilirsin.
