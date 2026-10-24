@@ -10,8 +10,8 @@ android {
         applicationId = "com.nur.quran"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.4.0"
     }
     buildTypes {
         release {
@@ -46,4 +46,36 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.11.1")
     implementation("androidx.media3:media3-session:1.11.1")
     testImplementation("junit:junit:4.13.2")
+}
+
+
+// Amiri Quran • SIL Open Font License 1.1.
+// Fetch pinned font on the build host, verify Git blob SHA-1 and package into APK.
+// Source: https://github.com/google/fonts/tree/main/ofl/amiriquran
+val prepareAmiriQuran by tasks.registering {
+    val file = layout.projectDirectory.file("src/main/res/font/amiri_quran.ttf").asFile
+    outputs.file(file)
+    doLast {
+        fun blobHash(data: ByteArray): String {
+            val md = java.security.MessageDigest.getInstance("SHA-1")
+            md.update(("blob " + data.size + "\u0000").toByteArray(Charsets.UTF_8))
+            md.update(data)
+            return md.digest().joinToString("") { "%02x".format(it) }
+        }
+        val expected = "2a4de2c4fd3e6fd23656586151935a98723acaff"
+        if (!file.isFile || blobHash(file.readBytes()) != expected) {
+            val source = "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/amiriquran/AmiriQuran-Regular.ttf"
+            val connection = java.net.URI(source).toURL().openConnection()
+            connection.connectTimeout = 20000
+            connection.readTimeout = 30000
+            val content = connection.getInputStream().use { it.readBytes() }
+            check(blobHash(content) == expected) { "Unexpected Amiri Quran font version" }
+            file.parentFile.mkdirs()
+            file.writeBytes(content)
+        }
+        check(blobHash(file.readBytes()) == expected)
+    }
+}
+tasks.matching { it.name == "preBuild" }.configureEach {
+    dependsOn(prepareAmiriQuran)
 }

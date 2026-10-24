@@ -10,7 +10,8 @@ data class Surah(
     val latinName: String,
     val turkishName: String,
     val revelation: String,
-    val verses: List<String>
+    val verses: List<String>,
+    val openingBasmala: String? = null
 ) {
     val ayahCount: Int get() = verses.size
 }
@@ -55,13 +56,15 @@ class QuranRepository private constructor(val surahs: List<Surah>) {
                 require(number == index + 1 && count > 0 && cursor + count <= verses.size)
                 val list = verses.subList(cursor, cursor + count).toList()
                 cursor += count
+                val (visibleVerses, basmala) = QuranTextRules.separateOpening(number, list)
                 Surah(
                     number = number,
                     arabicName = item.getString("name_arabic"),
                     latinName = item.getString("name_transliteration"),
                     turkishName = turkishNames[index],
                     revelation = item.optString("revelation_type"),
-                    verses = list
+                    verses = visibleVerses,
+                    openingBasmala = basmala
                 )
             }
             require(cursor == 6236)
