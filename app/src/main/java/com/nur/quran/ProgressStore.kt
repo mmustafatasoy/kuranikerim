@@ -44,6 +44,41 @@ class ProgressStore(context: Context) {
         prefs.edit().putBoolean("dark_theme", value).commit()
     }
 
+
+    fun mealFontSize(): Int = prefs.getInt("meal_font_size", 16).coerceIn(12, 25)
+    fun setMealFontSize(value: Int) {
+        prefs.edit().putInt("meal_font_size", value.coerceIn(12, 25)).commit()
+    }
+    fun coloredArabic(): Boolean = prefs.getBoolean("colored_arabic", true)
+    fun setColoredArabic(value: Boolean) {
+        prefs.edit().putBoolean("colored_arabic", value).commit()
+    }
+    fun followMeal(): Boolean = prefs.getBoolean("follow_meal", true)
+    fun setFollowMeal(value: Boolean) {
+        prefs.edit().putBoolean("follow_meal", value).commit()
+    }
+    fun showMeal(): Boolean = prefs.getBoolean("show_meal", true)
+    fun setShowMeal(value: Boolean) {
+        prefs.edit().putBoolean("show_meal", value).commit()
+    }
+    fun autoNextAyah(): Boolean = prefs.getBoolean("auto_next_ayah", true)
+    fun setAutoNextAyah(value: Boolean) {
+        prefs.edit().putBoolean("auto_next_ayah", value).commit()
+    }
+    fun reciterId(): String {
+        val value = prefs.getString("reciter_id", "ar.alafasy") ?: "ar.alafasy"
+        return if (value in setOf("ar.alafasy", "ar.sudais", "ar.husary", "ar.minshawi"))
+            value else "ar.alafasy"
+    }
+    fun setReciterId(value: String) {
+        if(value in setOf("ar.alafasy","ar.sudais","ar.husary","ar.minshawi"))
+            prefs.edit().putString("reciter_id", value).commit()
+    }
+    fun speed(): Float = prefs.getFloat("audio_speed", 1f).coerceIn(.75f, 1.5f)
+    fun setSpeed(value: Float) {
+        prefs.edit().putFloat("audio_speed", value.coerceIn(.75f, 1.5f)).commit()
+    }
+
     fun audioUri(surah: Int): String? = prefs.getString("local_audio_$surah", null)
 
     fun setAudioUri(surah: Int, uri: String) {
