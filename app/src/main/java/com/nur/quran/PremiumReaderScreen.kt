@@ -112,7 +112,7 @@ fun PremiumReaderScreen(
             },
             onSettings={settingsOpen=true}
         )
-        RefSurahBanner(surah)
+        PremiumBasmalahHeader(surah)
         if (settings.mealVisible) {
             Text(
                 "Türkçe meal: Şaban Piriş • QuranEnc.com",
