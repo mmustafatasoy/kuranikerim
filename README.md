@@ -2,6 +2,16 @@
 
 **Android 8.0 (API 26) ve üstünü hedefleyen Türkçe, çevrimdışı Kur'an okuyucu.**
 
+## NUR v0.9.0 — HTML Premium V2'den Android ana sayfa
+
+- Kullanıcının renkli hareketli HTML taslağı gerçek Jetpack Compose ana sayfasına aktarıldı: koyu zümrüt/turkuaz hero, altın besmele kartı, cami silüeti ve büyük harekeli Arapça **ٱللّٰهُ** / **مُحَمَّدٌ** madalyonları.
+- Arapça harfler, üstün/esre/ötre ve şedde işaretleri Amiri Quran fontuyla korunur. Dönen unsur yazı değil **süsleme halkasıdır**; yazılar okunabilir ve sabit kalır.
+- Dört fonksiyonel renkli kart: Kur’an (sureler), İbadet Rehberi, Elifba, Sesli Kütüphane. Sesli Kütüphane ayrı gerçek Compose ekranında hazır dört sureyi ve tüm sureleri açar.
+- Günlük ayet örneği: Bakara 2:153; tıklandığında Bakara suresi açılır. Sabit örnektir, her gün sunucudan değişmez.
+- Alt menü Ana Sayfa, Kur’an, İbadet, Kütüphane, Ayarlar olacak şekilde yenilendi. Arama ana sayfanın üst kısmında erişilebilir.
+- Açık/koyu tema ve GitHub güncelleme denetimi yeni ekrandan kullanılabilir. Okuyucu, kıraat, İbadet Rehberi, çevrimdışı ses, Android safeDrawing ve mevcut yer imleri korunur.
+- **Dağıtım kısıtı:** Bu kod main'e geçtiğinde GitHub Actions debug APK üretebilir, ancak telefonlara uygulama içi güncelleme otomatik ulaşabilmesi için `v0.9.0` imzalı GitHub Release gerekir. Kalıcı imzalama secret'ları ayarlanmadan signed yayın gerçekleşmez. Önceki debug APK ile imza uyuşmazlığı ilk kurulumda söz konusu olabilir.
+
 ## NUR v0.8.0 — Güncelleme Sistemi (GitHub Releases)
 
 - Uygulama açılınca GitHub'ın yayımlanan son kararlı sürümü HTTPS üzerinden kontrol edilir.

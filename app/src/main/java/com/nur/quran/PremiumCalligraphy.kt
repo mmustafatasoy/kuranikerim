@@ -37,12 +37,12 @@ internal fun AnimatedCalligraphySeal(
     val transition = rememberInfiniteTransition(label = "calligraphy-decoration")
     val rotation by transition.animateFloat(
         initialValue = 0f, targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(28000, easing = LinearEasing)),
+        animationSpec = infiniteRepeatable(tween(19000, easing = LinearEasing)),
         label = "rosette-turn"
     )
     val glow by transition.animateFloat(
         initialValue = .74f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(3100), RepeatMode.Reverse),
+        animationSpec = infiniteRepeatable(tween(2900), RepeatMode.Reverse),
         label = "soft-gold-light"
     )
     Box(
@@ -52,9 +52,20 @@ internal fun AnimatedCalligraphySeal(
         Canvas(Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2, size.height / 2)
             val radius = size.minDimension * .49f
-            drawCircle(Color(0xFFEFDE9F), radius, center)
+            drawCircle(Color(0xFFD5A147), radius, center)
+            drawCircle(Color(0xFFFFF5D0), radius * .96f, center)
+            drawCircle(Color(0xFF045B50), radius * .91f, center)
+            for (i in 0 until 12) {
+                val a = (rotation + i * 30f) * PI / 180.0
+                val x = center.x + cos(a).toFloat() * radius * .86f
+                val y = center.y + sin(a).toFloat() * radius * .86f
+                drawCircle(
+                    if (i % 2 == 0) Color(0xFF27BDA5) else Color(0xFFFFCC70),
+                    radius * .095f, Offset(x, y), alpha = glow
+                )
+            }
             drawCircle(Color(0xFF055949), radius * .93f, center)
-            drawCircle(Color(0xFFFFF8E8), radius * .80f, center)
+            drawCircle(Color(0xFFFFF8E8), radius * .78f, center)
             // Rotating eight-lobed arabesque: gold and turquoise, text never rotates.
             for (i in 0 until 8) {
                 val a = (rotation + i * 45f) * PI / 180.0
@@ -65,17 +76,24 @@ internal fun AnimatedCalligraphySeal(
                     radius * .13f, Offset(xx, yy), alpha = glow
                 )
             }
-            drawCircle(Color(0xFFFFF9EC), radius * .64f, center)
-            drawCircle(Color(0xFFD4A248), radius * .62f, center,
+            drawCircle(Color(0xFFFFF9EC), radius * .72f, center)
+            drawCircle(Color(0xFFD4A248), radius * .70f, center,
                 style = Stroke(width = 2.dp.toPx()))
             drawCircle(Color(0xFF095F4B), radius * .95f, center,
                 style = Stroke(width = 1.dp.toPx()))
         }
         Text(
             inscription,
-            color = Color(0xFF005643), fontFamily = RefFont,
-            fontSize = if (inscription == "محمد") 27.sp else 29.sp,
-            lineHeight = 43.sp, maxLines = 1,
+            color = Color(0xFF064C3D), fontFamily = RefFont,
+            fontSize = when {
+                sizeDp >= 100 && inscription.contains("مُ") -> 35.sp
+                sizeDp >= 100 -> 38.sp
+                inscription.contains("مُ") -> 23.sp
+                else -> 27.sp
+            },
+            lineHeight = if (sizeDp >= 100) 57.sp else 39.sp,
+            maxLines = 1, softWrap = false,
+            modifier = Modifier.fillMaxWidth(.90f),
             style = TextStyle(textDirection = TextDirection.Rtl),
             textAlign = TextAlign.Center
         )
@@ -101,7 +119,7 @@ internal fun PremiumBasmalahHeader(surah: Surah) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                AnimatedCalligraphySeal("الله", sizeDp = 77)
+                AnimatedCalligraphySeal("ٱللّٰهُ", sizeDp = 77)
                 Column(Modifier.weight(1f).padding(horizontal = 3.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(surah.arabicName, color = green, fontFamily = RefFont,
@@ -112,7 +130,7 @@ internal fun PremiumBasmalahHeader(surah: Surah) {
                         color = green, fontSize = 10.sp, letterSpacing = 1.sp,
                         textAlign = TextAlign.Center)
                 }
-                AnimatedCalligraphySeal("محمد", sizeDp = 77)
+                AnimatedCalligraphySeal("مُحَمَّدٌ", sizeDp = 77)
             }
             if (surah.openingBasmala != null) {
                 Spacer(Modifier.height(7.dp))
