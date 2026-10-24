@@ -16,9 +16,23 @@ android {
         versionCode = 9
         versionName = "0.8.0"
     }
+    // Keep release signing credentials ONLY in GitHub Actions repository secrets.
+    // No private key or password is committed to GitHub source control.
+    signingConfigs {
+        create("nurRelease") {
+            val path = System.getenv("NUR_RELEASE_KEYSTORE_PATH")
+            if (!path.isNullOrBlank()) {
+                storeFile = file(path)
+                storePassword = System.getenv("NUR_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("NUR_KEY_ALIAS")
+                keyPassword = System.getenv("NUR_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("nurRelease")
         }
     }
     compileOptions {
@@ -49,6 +63,8 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.11.1")
     implementation("androidx.media3:media3-session:1.11.1")
     testImplementation("junit:junit:4.13.2")
+    // Local unit tests for GitHub's JSON release metadata.
+    testImplementation("org.json:json:20240303")
 }
 
 
