@@ -422,11 +422,10 @@ private fun ColoredQuranVerse(
                 }
             },
         fontFamily = SurahFont,
-        fontSynthesis = FontSynthesis.None,
         fontSize = size.sp,
         lineHeight = (size * 1.7f).sp,
         textAlign = TextAlign.Center,
-        style = TextStyle(textDirection = TextDirection.Rtl),
+        style = TextStyle(textDirection = TextDirection.Rtl, fontSynthesis = FontSynthesis.None),
         onTextLayout = { textLayout = it }
     )
 }
