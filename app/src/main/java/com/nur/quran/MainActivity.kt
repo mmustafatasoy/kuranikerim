@@ -5,6 +5,8 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -50,6 +52,12 @@ private val Muted = Color(0xFFBBD0C1)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(
+                android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT
+            )
+        )
         setContent { NurApp() }
     }
 }
@@ -79,6 +87,7 @@ private fun NurApp() {
     val fg = if (dark) Color.White else Emerald
     val card = if (dark) CardGreen else Color.White
     MaterialTheme(colorScheme = if (dark) colors else lightColors) {
+        Box(Modifier.fillMaxSize().background(bg).windowInsetsPadding(WindowInsets.safeDrawing)) {
         when {
             result == null -> Box(Modifier.fillMaxSize().background(bg), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Gold)
@@ -107,14 +116,16 @@ private fun NurApp() {
                     }
                 } else {
                     Scaffold(
+                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
                         containerColor = bg,
                         bottomBar = {
-                            NavigationBar(containerColor = card) {
+                            NavigationBar(containerColor = card, windowInsets = WindowInsets(0, 0, 0, 0)) {
                                 listOf(
-                                    Triple("home", "Ana Sayfa", Icons.Default.Home),
-                                    Triple("quran", "Kur’an", Icons.Default.MenuBook),
-                                    Triple("learn", "Öğren", Icons.Default.School),
-                                    Triple("worship", "İbadet", Icons.Default.Explore)
+                                    Triple("home", "Kur’an", Icons.Default.MenuBook),
+                                    Triple("quran", "Sureler", Icons.Default.List),
+                                    Triple("search", "Ara", Icons.Default.Search),
+                                    Triple("worship", "Namaz", Icons.Default.Explore),
+                                    Triple("settings", "Ayarlar", Icons.Default.Settings)
                                 ).forEach { (id, label, icon) ->
                                     NavigationBarItem(
                                         selected = tab == id,
@@ -143,14 +154,17 @@ private fun NurApp() {
                                     onOpenWorship = { tab = "worship" },
                                     onChangeTheme = { dark = !dark; store.setDark(dark) }
                                 )
-                                "quran" -> SurahListScreen(repository, dark) { readingSurah = it }
+                                "quran" -> ReferenceSurahListScreen(repository, onOpen = { readingSurah = it })
+                                "search" -> ReferenceSurahListScreen(repository, onOpen = { readingSurah = it }, focusSearch = true)
                                 "learn" -> LearningScreen(dark)
-                                else -> WorshipScreen(dark)
+                                "worship" -> WorshipScreen(dark)
+                                else -> ReferenceAppSettings(dark = dark, onTheme = { dark = !dark; store.setDark(dark) })
                             }
                         }
                     }
                 }
             }
+        }
         }
     }
 }
