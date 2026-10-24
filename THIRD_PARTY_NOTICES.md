@@ -19,3 +19,10 @@
 - Gradle Wrapper scripts/JAR: Gradle 8.13 (https://github.com/gradle/gradle)
 - Wrapper JAR v8.13.0 upstream SHA 9bbc975c742b298b441bfb90dbc124400a3751b9
 - Jetpack Compose, Kotlin, AndroidX bağımlılıkları kendi lisanslarına tabidir.
+
+## Al Quran Cloud / Islamic Network ayet kıraat akışı
+- Kaynak: https://alquran.cloud/cdn
+- Kullanım şartları: https://alquran.cloud/terms-and-conditions
+- Seslendiren: Mishary Rashid Alafasy (`ar.alafasy`, 64 kbps).
+- Ayet sesleri uzaktan akış olarak dinlenir. Ses kayıtlarının telif hakları kendi hak sahiplerine aittir.
+- Kaynak dosyalar uygulama paketine veya bu depoya dahil edilmemiştir.
