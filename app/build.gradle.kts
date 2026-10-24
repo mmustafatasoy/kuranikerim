@@ -1,3 +1,6 @@
+import java.security.MessageDigest
+import java.net.URI
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -57,7 +60,7 @@ val prepareAmiriQuran by tasks.registering {
     outputs.file(file)
     doLast {
         fun blobHash(data: ByteArray): String {
-            val md = java.security.MessageDigest.getInstance("SHA-1")
+            val md = MessageDigest.getInstance("SHA-1")
             md.update(("blob " + data.size + "\u0000").toByteArray(Charsets.UTF_8))
             md.update(data)
             return md.digest().joinToString("") { "%02x".format(it) }
@@ -65,7 +68,7 @@ val prepareAmiriQuran by tasks.registering {
         val expected = "2a4de2c4fd3e6fd23656586151935a98723acaff"
         if (!file.isFile || blobHash(file.readBytes()) != expected) {
             val source = "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/amiriquran/AmiriQuran-Regular.ttf"
-            val connection = java.net.URI(source).toURL().openConnection()
+            val connection = URI(source).toURL().openConnection()
             connection.connectTimeout = 20000
             connection.readTimeout = 30000
             val content = connection.getInputStream().use { it.readBytes() }
