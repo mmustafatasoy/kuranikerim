@@ -2,6 +2,18 @@
 
 **Android 8.0 (API 26) ve üstünü hedefleyen Türkçe, çevrimdışı Kur'an okuyucu.**
 
+## Sesle harf eşleştirme v0.6.0
+
+- Okuma ekranına **harf eşleştirme** (kalem simgesi) eklendi. Ayeti dinlerken, sesin başladığı her harfi sırayla işaretleyip tamamını cihazda kaydedebilirsin.
+- Ayrıştırıcı Arapça esas harfleri, harekeleri ve diğer birleştirici işaretleri bir arada tutar; orijinal Kur’an metni değiştirilmez.
+- Media3 oynatıcısının **gerçek ayet ses konumu (ms)** 70 ms aralıklarla dinlenir. Kayıtlı bir başlangıç/bitiş işaretine rastlandığında yalnızca o harf kırmızı görünür; diğer harfler orijinal renklerini korur.
+- Bu zamanlama **her ayete ve hafıza özel** saklanır. Başka hafızın kaydıyla karşılaştırılıp kaydırılmaz. Kullanıcı eşleştirmesi hatalıysa geri alıp yeniden işaretleyebilir.
+- **Sınırlama:** Al Quran Cloud MP3 kayıtlarında doğrulanmış harf-seviyesi zamanlama bulunmuyor. Bu sürümde **otomatik tahmin yapılmaz**, eşleştirilmemiş ayette sadece aktif ayet/meal vurgusu çalışır. Harflerin kendiliğinden doğru zamanlarda kırmızı olabilmesi için ilgili ayetin elle uzman eşleştirilmesi veya aynı ses kaydına ait lisanslı ve doğrulanmış zaman verileri gereklidir.
+- Harf eşleme ekranını açmak için ayet satırındaki **kalem** simgesine dokun. Ayet oynatılır; duyduğun harflerin başlangıcını işaretle ve sonuncudan sonra kaydet.
+- Kayıtlar `SharedPreferences` içinde yerel saklanır. İlgili sure/ayet hafızının kaydından başka kayda taşınmaz.
+- Aynı sesli ayete tekrar başlatma, ilerletme veya oynatma hızını değiştirmede zaman konumuna göre vurgulama yapılır.
+- Sesli tüm Kur’an ve mevcut v0.5.1 mealler, beyaz Amiri Quran sayfası, sistem alanları değişmeden korunmuştur.
+
 ## Hata düzeltmesi v0.5.1 — Nâs ve bütün surelerde ayet bazlı doğru Türkçe meal
 
 - Nâs suresinde 1–6 ayetlerinin tamamında aynı uzun Diyanet mealinin görünmesinin nedeni: `tr.diyanet` kaynağı bazı ayetleri toplu çevirmektedir.

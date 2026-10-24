@@ -48,6 +48,10 @@ fun PremiumReaderScreen(
     onWorship: () -> Unit = onBack
 ) {
     val ctx=LocalContext.current
+    val cueStore = remember { LetterTimingStore(ctx.applicationContext) }
+    var audioClock by remember(surah.number) { mutableStateOf(VerseAudioClock()) }
+    var editingAyah by remember(surah.number) { mutableIntStateOf(0) }
+    var cueRevision by remember(surah.number) { mutableIntStateOf(0) }
     val last=remember(surah.number) {
         store.position().takeIf { it.surah==surah.number }?.ayah
             ?.coerceIn(1,surah.ayahCount) ?: 1
@@ -154,6 +158,16 @@ fun PremiumReaderScreen(
                 val n=index+1
                 val active=isPlaying && playingVerse==n
                 val bookmark=remember(savedRevision,n) {store.hasBookmark(surah.number,n)}
+                val glyphCount = remember(ayahText) {
+                    ArabicLetterTimeline.glyphs(ayahText).size
+                }
+                val manualCues = remember(surah.number,n,settings.reciter,cueRevision,glyphCount) {
+                    cueStore.load(settings.reciter,surah.number,n,glyphCount)
+                }
+                val redLetter = if(active && audioClock.ayah==n &&
+                        audioClock.reciter==settings.reciter) {
+                    LetterCueMath.activeAt(manualCues,audioClock.positionMs,audioClock.isPlaying)
+                } else -1
                 Surface(
                     modifier=Modifier.fillMaxWidth(),
                     color=if(active)Color(0xFFFFEBE7) else Color.White,
@@ -174,6 +188,16 @@ fun PremiumReaderScreen(
                                     tint=if(active)RefRed else RefGreen)
                             }
                             IconButton(onClick={
+                                editingAyah=n
+                                requestedVerse=n
+                                playNonce++
+                            }, modifier=Modifier.size(35.dp)) {
+                                Icon(Icons.Default.EditNote,
+                                    "Bu ayetin harflerini sesle eşleştir",
+                                    tint=if(manualCues.isNotEmpty())RefGreen else RefGold,
+                                    modifier=Modifier.size(21.dp))
+                            }
+                            IconButton(onClick={
                                 store.toggleBookmark(surah.number,n);savedRevision++
                             }, modifier=Modifier.size(37.dp)) {
                                 Icon(if(bookmark)Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
@@ -181,7 +205,7 @@ fun PremiumReaderScreen(
                                     modifier=Modifier.size(20.dp))
                             }
                         }
-                        RefColoredArabic(ayahText,active,settings)
+                        RefColoredArabic(ayahText,settings,redLetter,active)
                         if(settings.mealVisible) {
                             meal?.getOrNull(index)?.let { translation ->
                                 Text(translation,
@@ -209,7 +233,8 @@ fun PremiumReaderScreen(
             onPlayingChanged={isPlaying=it},
             reciterId=settings.reciter,autoNext=settings.autoNext,
             onSettings={settingsOpen=true},
-            onLocalAudio={localPanel=!localPanel}
+            onLocalAudio={localPanel=!localPanel},
+            onAudioClock={ audioClock=it }
         )
         Row(
             Modifier.fillMaxWidth().background(Color.White)
@@ -227,6 +252,29 @@ fun PremiumReaderScreen(
             }
             RefNavButton(Icons.Default.Settings,"Ayarlar",false) {settingsOpen=true}
         }
+    }
+    if (editingAyah in 1..surah.ayahCount) {
+        val current=editingAyah
+        val spoken=surah.verses[current-1]
+        val size=ArabicLetterTimeline.glyphs(spoken).size
+        val existing=remember(surah.number,current,settings.reciter,cueRevision) {
+            cueStore.load(settings.reciter,surah.number,current,size).isNotEmpty()
+        }
+        LetterSyncDialog(
+            surah=surah.number, ayah=current, arabic=spoken,
+            reciter=settings.reciter, audio=audioClock, previouslyAligned=existing,
+            onReplay={requestedVerse=current;playNonce++},
+            onSave={ cues ->
+                cueStore.save(settings.reciter,surah.number,current,size,cues).also {
+                    if(it)cueRevision++
+                }
+            },
+            onDelete={
+                cueStore.clear(settings.reciter,surah.number,current)
+                cueRevision++
+            },
+            onDismiss={editingAyah=0}
+        )
     }
     if(settingsOpen) {
         ReferenceAyahSettingsSheet(settings,onUpdate={saveSettings(it)},
@@ -295,33 +343,49 @@ private fun RefFloralMotif(modifier:Modifier=Modifier) {
 }
 
 @Composable
-private fun RefColoredArabic(text:String,active:Boolean,settings:RefReadingSettings) {
-    var chosen by remember(text){mutableIntStateOf(-1)}
-    var layout by remember(text){mutableStateOf<TextLayoutResult?>(null)}
-    val words=remember(text) {text.split(Regex("\\s+")).filter{it.isNotBlank()}}
-    val annotated=buildAnnotatedString {
-        words.forEachIndexed {index,word->
-            if(index>0)append(" ")
-            pushStringAnnotation("word",index.toString())
-            withStyle(SpanStyle(color=when {
-                active || chosen==index ->RefRed
-                settings.colored ->RefPalette[index%RefPalette.size]
-                else ->RefDark
-            })) {append(word)}
+private fun RefColoredArabic(
+    text: String,
+    settings: RefReadingSettings,
+    activeLetter: Int,
+    voiceActive: Boolean
+) {
+    var selected by remember(text) { mutableIntStateOf(-1) }
+    var layout by remember(text) { mutableStateOf<TextLayoutResult?>(null) }
+    val glyphs = remember(text) { ArabicLetterTimeline.glyphs(text) }
+    val colored = buildAnnotatedString {
+        glyphs.forEachIndexed { index, glyph ->
+            if (index > 0 && glyph.wordIndex != glyphs[index - 1].wordIndex) append(" ")
+            pushStringAnnotation("glyph", index.toString())
+            val tint = when {
+                activeLetter >= 0 && activeLetter == index -> RefRed
+                !voiceActive && activeLetter == -1 && selected == index -> RefRed
+                settings.colored -> RefPalette[glyph.wordIndex % RefPalette.size]
+                else -> RefDark
+            }
+            withStyle(SpanStyle(color = tint)) {
+                append(glyph.text)
+            }
             pop()
         }
     }
-    val size=(settings.arabicSize+12).coerceIn(36,68)
-    Text(annotated,modifier=Modifier.fillMaxWidth().padding(horizontal=2.dp)
-        .pointerInput(text) {
-            detectTapGestures {point->
-                val index=layout?.getOffsetForPosition(point) ?:return@detectTapGestures
-                chosen=annotated.getStringAnnotations("word",index,index)
-                    .firstOrNull()?.item?.toIntOrNull() ?: -1
-            }
-        },
-        fontSize=size.sp,lineHeight=(size*1.65f).sp,
-        fontFamily=RefFont,textAlign=TextAlign.Center,
-        style=TextStyle(textDirection=TextDirection.Rtl,fontSynthesis=FontSynthesis.None),
-        onTextLayout={layout=it})
+    val size = (settings.arabicSize + 12).coerceIn(36, 68)
+    Text(
+        colored,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp)
+            .pointerInput(text) {
+                detectTapGestures { point ->
+                    val offset = layout?.getOffsetForPosition(point)
+                        ?: return@detectTapGestures
+                    selected = colored.getStringAnnotations("glyph", offset, offset)
+                        .firstOrNull()?.item?.toIntOrNull() ?: -1
+                }
+            },
+        fontSize = size.sp, lineHeight = (size * 1.65f).sp,
+        fontFamily = RefFont, textAlign = TextAlign.Center,
+        style = TextStyle(
+            textDirection = TextDirection.Rtl,
+            fontSynthesis = FontSynthesis.None
+        ),
+        onTextLayout = { layout = it }
+    )
 }

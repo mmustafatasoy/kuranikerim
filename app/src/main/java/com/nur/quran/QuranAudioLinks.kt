@@ -24,7 +24,7 @@ object QuranAudioLinks {
     fun playlist(surah: Surah, precedingAyahs: Int, reciter: String = "ar.alafasy"): List<MediaItem> {
         require(precedingAyahs >= 0 && precedingAyahs + surah.ayahCount <= 6236)
         return (1..surah.ayahCount).map { ayah ->
-            val key = surah.number.toString() + ":" + ayah
+            val key = surah.number.toString() + ":" + ayah + ":" + reciter
             MediaItem.Builder()
                 .setUri(url(precedingAyahs + ayah, reciter))
                 .setMediaId(key)

@@ -46,3 +46,8 @@
 - License: SIL Open Font License 1.1.
 - Full license: third_party/AmiriQuran-OFL.txt and app/src/main/assets/fonts/AmiriQuran-OFL.txt.
 - Binary font fetched at build from pinned Google Fonts commit and checked against Git blob SHA 2a4de2c4fd3e6fd23656586151935a98723acaff.
+
+## Harf senkronizasyonu (v0.6.0)
+- NUR harf zamanları herhangi bir dış kaynaktan üretilmez; yalnızca uygulamada **dinleyici tarafından bir ses kaydına özel** manuel işaretlenip yerelde saklanır.
+- Mevcut Al Quran Cloud ayet MP3 akışları ve sahiplik şartları değişmemiştir.
+- Quran Foundation kelime segmentleri, belirli chapter audio kayıtlarına aittir ve farklı bir MP3 kaydının harf konumları gibi kullanılamaz. https://api-docs.quran.foundation/docs/content_apis_versioned/4.0.0/chapter-reciter-audio-file/
