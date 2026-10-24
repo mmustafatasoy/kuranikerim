@@ -98,6 +98,7 @@ private fun NurApp() {
                     key(readingSurah) {
                         ReaderScreen(
                             surah = repository.surah(readingSurah),
+                            globalAyahOffset = repository.surahs.take(readingSurah - 1).sumOf { it.ayahCount },
                             store = store,
                             fontSize = fontSize,
                             onFontSize = { fontSize = it; store.setFontSize(it) },
@@ -294,6 +295,7 @@ private fun SurahListScreen(repo: QuranRepository, dark: Boolean, onOpen: (Int) 
 @Composable
 private fun ReaderScreen(
     surah: Surah,
+    globalAyahOffset: Int,
     store: ProgressStore,
     fontSize: Int,
     onFontSize: (Int) -> Unit,
@@ -305,11 +307,20 @@ private fun ReaderScreen(
     val initialIndex = if (saved.surah == surah.number) (saved.ayah - 1).coerceIn(0, surah.ayahCount - 1) else 0
     val state = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
     var showAyah by remember { mutableIntStateOf(0) }
+    var audioAyah by remember(surah.number) { mutableIntStateOf(0) }
+    var requestedAyah by remember(surah.number) { mutableIntStateOf(1) }
+    var playNonce by remember(surah.number) { mutableIntStateOf(0) }
     var bookmarkRevision by remember { mutableIntStateOf(0) }
     val unusedRevision = bookmarkRevision
     LaunchedEffect(surah.number, state) {
         snapshotFlow { state.firstVisibleItemIndex }.distinctUntilChanged().collect { index ->
             store.savePosition(surah.number, (index + 1).coerceAtMost(surah.ayahCount))
+        }
+    }
+    LaunchedEffect(audioAyah) {
+        if (audioAyah in 1..surah.ayahCount &&
+            state.firstVisibleItemIndex != audioAyah - 1) {
+            state.animateScrollToItem(audioAyah - 1)
         }
     }
     Column(Modifier.fillMaxSize().background(if (dark) Emerald else Cream)) {
@@ -330,7 +341,20 @@ private fun ReaderScreen(
                 Icon(Icons.Default.Add, "Yazıyı büyüt", tint = fg)
             }
         }
-        LocalAudioPanel(surah.number, store, dark)
+        AyahAudioPanel(
+            surah = surah,
+            globalAyahOffset = globalAyahOffset,
+            store = store,
+            dark = dark,
+            requestedAyah = requestedAyah,
+            playNonce = playNonce,
+            onAyahChanged = { audioAyah = it; store.savePosition(surah.number, it) }
+        )
+        var showLocalAudio by remember(surah.number) { mutableStateOf(false) }
+        TextButton(onClick = { showLocalAudio = !showLocalAudio }) {
+            Text(if (showLocalAudio) "Yerel MP3 seçeneğini gizle" else "Cihazımdan MP3 oynat (çevrimdışı)")
+        }
+        if (showLocalAudio) LocalAudioPanel(surah.number, store, dark)
         HorizontalDivider(color = if (dark) SoftGreen else Color(0xFFE1DCCB))
         LazyColumn(
             state = state,
@@ -348,7 +372,9 @@ private fun ReaderScreen(
                         showAyah = verseNo
                     },
                     shape = RoundedCornerShape(17.dp),
-                    color = if (dark) CardGreen else Color.White
+                    color = if (audioAyah == verseNo) {
+                        if (dark) SoftGreen else Color(0xFFFFE5AF)
+                    } else if (dark) CardGreen else Color.White
                 ) {
                     Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -357,6 +383,13 @@ private fun ReaderScreen(
                                 fontSize = 12.sp, color = if (dark) Gold else SoftGreen,
                                 modifier = Modifier.weight(1f)
                             )
+                            IconButton(onClick = {
+                                requestedAyah = verseNo
+                                playNonce += 1
+                            }, modifier = Modifier.size(40.dp)) {
+                                Icon(Icons.Default.PlayCircle, "Bu ayeti sesli oku",
+                                    tint = if (dark) Gold else SoftGreen)
+                            }
                             IconButton(onClick = {
                                 store.toggleBookmark(surah.number, verseNo)
                                 bookmarkRevision += 1
@@ -376,7 +409,11 @@ private fun ReaderScreen(
                             color = fg,
                             style = TextStyle(textDirection = TextDirection.Rtl)
                         )
-                        Text("Dokun: kelime incele", color = if (dark) Muted else SoftGreen, fontSize = 10.sp)
+                        Text(
+                            if (audioAyah == verseNo) "▶ Sesli okunan ayet"
+                            else "Ayetin sesini dinlemek için ▶ düğmesine dokun",
+                            color = if (dark) Gold else SoftGreen, fontSize = 10.sp
+                        )
                     }
                 }
             }
