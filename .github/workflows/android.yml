@@ -34,26 +34,11 @@ jobs:
       - name: Verify bundled offline Quran audio
         run: |
           APK="app/build/outputs/apk/debug/app-debug.apk"
-          COUNT="$(unzip -Z1 "$APK" | grep -Ec '^assets/quran_audio/alafasy/[0-9]+\.mp3        if: success()
-        with:
-          name: nur-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 14
-)"
-          echo "Bundled offline ayah audio clips: $COUNT"
+          COUNT="$(unzip -Z1 "$APK" | grep -Ec '^assets/quran_audio/alafasy/[0-9]+\.mp3$')"
+          echo "Bundled audio clips: $COUNT"
           test "$COUNT" -eq 22
-          unzip -Z1 "$APK" | grep -q '^assets/quran_audio/alafasy/1\.mp3        if: success()
-        with:
-          name: nur-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 14
-
-          unzip -Z1 "$APK" | grep -q '^assets/quran_audio/alafasy/6236\.mp3        if: success()
-        with:
-          name: nur-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 14
-
+          unzip -Z1 "$APK" | grep -q '^assets/quran_audio/alafasy/1\.mp3$'
+          unzip -Z1 "$APK" | grep -q '^assets/quran_audio/alafasy/6236\.mp3$'
       - uses: actions/upload-artifact@v4
         if: success()
         with:
