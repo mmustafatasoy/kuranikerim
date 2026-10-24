@@ -13,8 +13,8 @@ android {
         applicationId = "com.nur.quran"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.6.0"
+        versionCode = 8
+        versionName = "0.7.0"
     }
     buildTypes {
         release {
@@ -81,4 +81,50 @@ val prepareAmiriQuran by tasks.registering {
 }
 tasks.matching { it.name == "preBuild" }.configureEach {
     dependsOn(prepareAmiriQuran)
+}
+
+
+// Bundled offline starter Quran: 22 Alafasy 64kbps clips.
+// Al Quran Cloud Terms: https://alquran.cloud/terms-and-conditions
+// Recordings are credited, used for educational listening; audio rights stay with
+// the reciter and original rightsholders. No local audio picker is needed.
+val prepareStarterRecitations by tasks.registering {
+    val destination = layout.projectDirectory.dir("src/main/assets/quran_audio/alafasy").asFile
+    val ids = (1..7).toList() + (6222..6236).toList()
+    outputs.files(ids.map { destination.resolve("$it.mp3") })
+    doLast {
+        destination.mkdirs()
+        for (id in ids) {
+            val file = destination.resolve("$id.mp3")
+            if (file.isFile && file.length() > 1024L) continue
+            val remote = URI(
+                "https://cdn.islamic.network/quran/audio/64/ar.alafasy/$id.mp3"
+            ).toURL()
+            var last: Exception? = null
+            var success = false
+            for (attempt in 1..3) {
+                try {
+                    val connection = remote.openConnection()
+                    connection.connectTimeout = 20000
+                    connection.readTimeout = 30000
+                    val data = connection.getInputStream().use { it.readBytes() }
+                    check(data.size in 1025..6000000) { "Invalid audio clip size $id" }
+                    val temp = destination.resolve("$id.part")
+                    temp.writeBytes(data)
+                    if (!temp.renameTo(file)) {
+                        temp.copyTo(file, overwrite = true)
+                        temp.delete()
+                    }
+                    success = true
+                    break
+                } catch (error: Exception) {
+                    last = error
+                }
+            }
+            check(success) { "Starter MP3 $id could not be downloaded: $last" }
+        }
+    }
+}
+tasks.matching { it.name == "preBuild" }.configureEach {
+    dependsOn(prepareStarterRecitations)
 }
