@@ -26,3 +26,10 @@
 - Seslendiren: Mishary Rashid Alafasy (`ar.alafasy`, 64 kbps).
 - Ayet sesleri uzaktan akış olarak dinlenir. Ses kayıtlarının telif hakları kendi hak sahiplerine aittir.
 - Kaynak dosyalar uygulama paketine veya bu depoya dahil edilmemiştir.
+
+## Türkçe meal / Turkish translation (tr.diyanet)
+- Kaynak: Al Quran Cloud API, https://api.alquran.cloud/v1/surah/1/tr.diyanet
+- Kullanım şartları: https://alquran.cloud/terms-and-conditions
+- Meal: Diyanet İşleri Başkanlığı Türkçe meal baskısı. İçeriğin hakları çeviri sahibine aittir.
+- Bu depoya toplu meal eklenmez. Kullanıcılar API ile alır, yalnızca kişisel çevrimdışı okuma için cihaz önbelleğinde kalır.
+- Renkli otomatik ses takibi: **ayet** seviyesinde; harf/kelime zamanlaması henüz bulunmuyor.

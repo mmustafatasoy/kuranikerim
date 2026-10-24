@@ -2,7 +2,15 @@
 
 **Android 8.0 (API 26) ve üstünü hedefleyen Türkçe, çevrimdışı Kur'an okuyucu.**
 
-## Yeni sürüm (v0.2.0) — internetten sesli kıraat
+## Yeni sürüm (v0.3.0) — Renkli Arapça / Türkçe meal
+- Beyaz ve fildişi zeminde büyük, çok renkli Arapça metin.
+- Kıraat sırasında **aktif ayet** ve onun Türkçe meali aynı anda kırmızı vurgulanır.
+- Kullanıcı kelimeye dokunduğunda seçilen Arapça kelime kırmızı görünür.
+- Not: Kelime/harf seviyesinde gerçek ses zaman damgaları henüz yok; otomatik renk takibi **ayet seviyesindedir**, eşleşme uydurulmaz.
+- Türkçe meal kaynağı: Al Quran Cloud **tr.diyanet**; internetle getirilir, başarıyla açıldığında cihazda çevrimdışı okunabilir.
+- Eski yer imleri, kaldığın yer ve yerel MP3 seçimi korunmuştur.
+
+## Önceki sesli sürüm (v0.2.0) — internetten sesli kıraat
 
 - Sure okuma ekranında **Sureyi oku** ile Mishary Rashid Alafasy kıraatini başlat.
 - Her ayetin yanındaki **▶** düğmesiyle seçilen ayetten itibaren sesli okumaya başla.
