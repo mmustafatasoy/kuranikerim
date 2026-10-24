@@ -60,8 +60,7 @@ internal fun reciterLabel(id: String): String =
 internal fun ReferenceAyahSettingsSheet(
     settings: RefReadingSettings,
     onUpdate: (RefReadingSettings) -> Unit,
-    onDismiss: () -> Unit,
-    onLocalAudio: () -> Unit
+    onDismiss: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest=onDismiss,
@@ -150,14 +149,15 @@ internal fun ReferenceAyahSettingsSheet(
             RefSettingToggle("Otomatik Sonraki Ayet",
                 "Kapalıysa seçilen ayetten sonra oynatma durur.",
                 settings.autoNext){onUpdate(settings.copy(autoNext=it))}
-            Surface(onClick=onLocalAudio,color=Color(0xFFF1F7F3),
-                shape=RoundedCornerShape(13.dp)) {
+            Surface(color=Color(0xFFF1F7F3),shape=RoundedCornerShape(13.dp)) {
                 Row(Modifier.fillMaxWidth().padding(12.dp),verticalAlignment=Alignment.CenterVertically) {
-                    Icon(Icons.Default.FolderOpen,null,tint=RefGreen)
+                    Icon(Icons.Default.Download,null,tint=RefGreen)
                     Spacer(Modifier.width(10.dp))
-                    Text("Cihazdan çevrimdışı MP3 aç",modifier=Modifier.weight(1f),
-                        fontSize=14.sp,color=RefDark)
-                    Icon(Icons.Default.ChevronRight,null,tint=RefGreen)
+                    Column(Modifier.weight(1f)) {
+                        Text("Hazır çevrimdışı kıraat",color=RefDark,fontWeight=FontWeight.Bold,fontSize=14.sp)
+                        Text("Fâtiha, İhlâs, Felak ve Nâs yüklü. Diğer sureler için oynatıcının 'Sureyi indir' simgesine bas.",
+                            color=RefGreen,fontSize=11.sp)
+                    }
                 }
             }
             Spacer(Modifier.height(18.dp))

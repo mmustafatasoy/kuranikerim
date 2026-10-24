@@ -61,7 +61,6 @@ fun PremiumReaderScreen(
         mutableStateOf(store.loadRefSettings().copy(arabicSize=fontSize))
     }
     var settingsOpen by remember { mutableStateOf(false) }
-    var localPanel by remember { mutableStateOf(false) }
     var playingVerse by remember(surah.number) { mutableIntStateOf(0) }
     var isPlaying by remember(surah.number) { mutableStateOf(false) }
     var requestedVerse by remember(surah.number) { mutableIntStateOf(last) }
@@ -225,7 +224,6 @@ fun PremiumReaderScreen(
                 }
             }
         }
-        if(localPanel) LocalAudioPanel(surah.number,store,false)
         AyahAudioPanel(
             surah=surah, globalAyahOffset=globalAyahOffset,
             store=store,dark=true,requestedAyah=requestedVerse,
@@ -233,7 +231,6 @@ fun PremiumReaderScreen(
             onPlayingChanged={isPlaying=it},
             reciterId=settings.reciter,autoNext=settings.autoNext,
             onSettings={settingsOpen=true},
-            onLocalAudio={localPanel=!localPanel},
             onAudioClock={ audioClock=it }
         )
         Row(
@@ -279,7 +276,7 @@ fun PremiumReaderScreen(
     if(settingsOpen) {
         ReferenceAyahSettingsSheet(settings,onUpdate={saveSettings(it)},
             onDismiss={settingsOpen=false},
-            onLocalAudio={settingsOpen=false;localPanel=true})
+            )
     }
 }
 
