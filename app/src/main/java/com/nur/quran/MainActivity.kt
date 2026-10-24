@@ -38,6 +38,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 
@@ -66,6 +68,23 @@ class MainActivity : ComponentActivity() {
 private fun NurApp() {
     val context = LocalContext.current
     val store = remember { ProgressStore(context) }
+    val updater = remember { NurUpdateManager(context.applicationContext) }
+    val updateScope = rememberCoroutineScope()
+    var updateDialogOpen by remember { mutableStateOf(false) }
+    var dismissedUpdateTag by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        updater.check()
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            updater.pollDownload()
+            delay(1700L)
+        }
+    }
+    LaunchedEffect(updater.release?.tag) {
+        val tag = updater.release?.tag
+        if (tag != null && tag != dismissedUpdateTag) updateDialogOpen = true
+    }
     val result by produceState<Result<QuranRepository>?>(initialValue = null) {
         value = runCatching { withContext(Dispatchers.IO) { QuranRepository.load(context.assets) } }
     }
@@ -158,12 +177,29 @@ private fun NurApp() {
                                 "search" -> ReferenceSurahListScreen(repository, onOpen = { readingSurah = it }, focusSearch = true)
                                 "learn" -> LearningScreen(dark)
                                 "worship" -> WorshipGuideScreen(onOpenSurah = { readingSurah = it })
-                                else -> ReferenceAppSettings(dark = dark, onTheme = { dark = !dark; store.setDark(dark) })
+                                else -> ReferenceAppSettings(
+                                    dark = dark,
+                                    onTheme = { dark = !dark; store.setDark(dark) },
+                                    onCheckUpdates = {
+                                        updateDialogOpen = true
+                                        updateScope.launch { updater.check(manual = true) }
+                                    }
+                                )
                             }
                         }
                     }
                 }
             }
+        }
+        if (updateDialogOpen) {
+            NurUpdateDialog(
+                manager = updater,
+                onDismiss = {
+                    dismissedUpdateTag = updater.release?.tag ?: ""
+                    updateDialogOpen = false
+                },
+                onCheckAgain = { updateScope.launch { updater.check(manual = true) } }
+            )
         }
         }
     }
