@@ -23,6 +23,11 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -60,6 +65,13 @@ fun AyahAudioPanel(
     var movingSlider by remember(surah.number) { mutableStateOf(false) }
     var sliderPosition by remember(surah.number) { mutableFloatStateOf(0f) }
     var currentSpeed by remember(surah.number) { mutableFloatStateOf(store.speed()) }
+    var downloading by remember(surah.number, reciterId) { mutableStateOf(false) }
+    var downloadProgress by remember(surah.number, reciterId) { mutableIntStateOf(0) }
+    var offlineReady by remember(surah.number, reciterId) {
+        mutableIntStateOf(OfflineQuranAudio.readyCount(context, surah, globalAyahOffset, reciterId))
+    }
+    val downloadScope = rememberCoroutineScope()
+
 
     fun refresh(player: MediaController) {
         isPlaying = player.isPlaying
@@ -125,7 +137,7 @@ fun AyahAudioPanel(
         if(number !in 1..surah.ayahCount)return
         try {
             error=null
-            val items=QuranAudioLinks.playlist(surah,globalAyahOffset,reciterId)
+            val items=QuranAudioLinks.playlist(context,surah,globalAyahOffset,reciterId)
             if(autoNext) p.setMediaItems(items,number-1,0L)
             else p.setMediaItem(items[number-1],0L)
             p.prepare()
@@ -256,8 +268,46 @@ fun AyahAudioPanel(
                     controller?.setPlaybackSpeed(currentSpeed)
                 }
                 RefPlayerAction(Icons.Default.Settings,"Ayet Ayarları",onSettings)
-                RefPlayerAction(Icons.Default.FolderOpen,"Çevrimdışı",onLocalAudio)
+                RefPlayerAction(
+                    if (offlineReady == surah.ayahCount) Icons.Default.OfflinePin
+                    else Icons.Default.Download,
+                    if (downloading) downloadProgress.toString()+"/"+surah.ayahCount
+                    else if (offlineReady == surah.ayahCount) "Hazır"
+                    else "Sureyi indir"
+                ) {
+                    if (!downloading && offlineReady < surah.ayahCount) {
+                        downloading = true
+                        error = null
+                        downloadScope.launch {
+                            try {
+                                OfflineQuranAudio.downloadSurah(
+                                    context, surah, globalAyahOffset, reciterId
+                                ) { done, total ->
+                                    withContext(Dispatchers.Main) {
+                                        downloadProgress = done
+                                        offlineReady = OfflineQuranAudio.readyCount(
+                                            context, surah, globalAyahOffset, reciterId
+                                        )
+                                    }
+                                }
+                                error = "Sure çevrimdışı dinlemeye hazır."
+                            } catch (e: Exception) {
+                                error = "İndirme tamamlanamadı. İnternet ve depolamayı kontrol et."
+                            } finally {
+                                offlineReady = OfflineQuranAudio.readyCount(
+                                    context, surah, globalAyahOffset, reciterId
+                                )
+                                downloading = false
+                            }
+                        }
+                    }
+                }
             }
+            if (downloading) LinearProgressIndicator(
+                progress = { downloadProgress.toFloat() / surah.ayahCount.coerceAtLeast(1) },
+                modifier = Modifier.fillMaxWidth(),
+                color = BarGold
+            )
             if(error!=null)Text(error ?: "",color=Color(0xFFFFC6AA),fontSize=11.sp)
         }
     }

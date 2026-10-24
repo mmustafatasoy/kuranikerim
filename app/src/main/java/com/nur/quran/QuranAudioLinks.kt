@@ -1,5 +1,6 @@
 package com.nur.quran
 
+import android.content.Context
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 
@@ -21,12 +22,12 @@ object QuranAudioLinks {
             bitrate + "/" + reciter + "/" + globalAyah + ".mp3"
     }
 
-    fun playlist(surah: Surah, precedingAyahs: Int, reciter: String = "ar.alafasy"): List<MediaItem> {
+    fun playlist(context: Context, surah: Surah, precedingAyahs: Int, reciter: String = "ar.alafasy"): List<MediaItem> {
         require(precedingAyahs >= 0 && precedingAyahs + surah.ayahCount <= 6236)
         return (1..surah.ayahCount).map { ayah ->
             val key = surah.number.toString() + ":" + ayah + ":" + reciter
             MediaItem.Builder()
-                .setUri(url(precedingAyahs + ayah, reciter))
+                .setUri(OfflineQuranAudio.mediaUri(context, reciter, precedingAyahs + ayah))
                 .setMediaId(key)
                 .setMediaMetadata(
                     MediaMetadata.Builder()

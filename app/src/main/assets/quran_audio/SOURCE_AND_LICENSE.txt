@@ -1,0 +1,8 @@
+Audio provider: Al Quran Cloud / Islamic Network.
+Reciter: Mishary Rashid Alafasy (ar.alafasy, 64 kbps).
+Original recordings and rights: reciter and respective rights holders.
+Source: https://cdn.islamic.network/quran/audio/64/ar.alafasy/{global_ayah}.mp3
+Terms (October 2026): https://alquran.cloud/terms-and-conditions
+Personal and educational playback. If any rights holder requests removal, comply.
+Bundled in APK: global ayahs 1-7, 6222-6236.
+Do not edit or remaster the source audio.

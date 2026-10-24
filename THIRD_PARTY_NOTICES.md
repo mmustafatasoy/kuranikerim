@@ -51,3 +51,12 @@
 - NUR harf zamanları herhangi bir dış kaynaktan üretilmez; yalnızca uygulamada **dinleyici tarafından bir ses kaydına özel** manuel işaretlenip yerelde saklanır.
 - Mevcut Al Quran Cloud ayet MP3 akışları ve sahiplik şartları değişmemiştir.
 - Quran Foundation kelime segmentleri, belirli chapter audio kayıtlarına aittir ve farklı bir MP3 kaydının harf konumları gibi kullanılamaz. https://api-docs.quran.foundation/docs/content_apis_versioned/4.0.0/chapter-reciter-audio-file/
+
+## NUR Offline Starter Recitations (v0.7.0)
+- Reciter: Mishary Rashid Alafasy (ar.alafasy, 64 kbps).
+- Audio source: https://cdn.islamic.network/quran/audio/64/ar.alafasy/{global_ayah}.mp3
+- 22 source recordings bundled on APK build for ayahs 1-7 and 6222-6236.
+- Terms: https://alquran.cloud/terms-and-conditions (personal/educational downloading and streaming allowed; copyright retained by respective rights holders).
+- Additional surah files downloaded only at the user's request, into their app-private storage. No MP3 file picker.
+- Diyanet general worship guidance: https://kurul.diyanet.gov.tr/tr/fetva/abdest-nedir-ve-nasil-alinir/0193c42d-4493-7cd5-0d48-874d6be1a7d3
+- Diyanet Namaz İlmihali: https://webdosya.diyanet.gov.tr/camilerhaftasi/UserFiles/00000000-0000-0000-0000-000000000000/2025/9/30/e686e446-fa96-4332-b0f5-81a644c6df12.pdf
