@@ -96,14 +96,13 @@ private fun NurApp() {
                 BackHandler(enabled = readingSurah != 0) { readingSurah = 0 }
                 if (readingSurah in 1..114) {
                     key(readingSurah) {
-                        ReaderScreen(
+                        PremiumReaderScreen(
                             surah = repository.surah(readingSurah),
                             globalAyahOffset = repository.surahs.take(readingSurah - 1).sumOf { it.ayahCount },
                             store = store,
                             fontSize = fontSize,
                             onFontSize = { fontSize = it; store.setFontSize(it) },
-                            onBack = { readingSurah = 0 },
-                            dark = dark
+                            onBack = { readingSurah = 0 }
                         )
                     }
                 } else {
@@ -459,7 +458,7 @@ private fun ReaderScreen(
 }
 
 @Composable
-private fun LocalAudioPanel(surahNumber: Int, store: ProgressStore, dark: Boolean) {
+internal fun LocalAudioPanel(surahNumber: Int, store: ProgressStore, dark: Boolean) {
     val context = LocalContext.current
     var audioUri by remember(surahNumber) { mutableStateOf(store.audioUri(surahNumber)) }
     var player by remember(surahNumber) { mutableStateOf<MediaPlayer?>(null) }

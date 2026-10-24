@@ -57,10 +57,12 @@ fun AyahAudioPanel(
     dark: Boolean,
     requestedAyah: Int,
     playNonce: Int,
-    onAyahChanged: (Int) -> Unit
+    onAyahChanged: (Int) -> Unit,
+    onPlayingChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
     val currentCallback by rememberUpdatedState(onAyahChanged)
+    val playingCallback by rememberUpdatedState(onPlayingChanged)
     var controller by remember(surah.number) { mutableStateOf<MediaController?>(null) }
     var playing by remember(surah.number) { mutableStateOf(false) }
     var currentAyah by remember(surah.number) { mutableIntStateOf(0) }
@@ -69,6 +71,7 @@ fun AyahAudioPanel(
 
     fun refresh(mediaController: MediaController) {
         playing = mediaController.isPlaying
+        playingCallback(playing)
         repeating = mediaController.repeatMode == Player.REPEAT_MODE_ONE
         val id = mediaController.currentMediaItem?.mediaId ?: return
         val parts = id.split(":")
@@ -97,6 +100,7 @@ fun AyahAudioPanel(
                     val listener = object : Player.Listener {
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             playing = isPlaying
+                            playingCallback(isPlaying)
                         }
                         override fun onMediaItemTransition(item: MediaItem?, reason: Int) {
                             refresh(player)
@@ -106,6 +110,7 @@ fun AyahAudioPanel(
                         }
                         override fun onPlayerError(exception: PlaybackException) {
                             playing = false
+                            playingCallback(false)
                             error = "Ses yüklenemedi. İnternet bağlantını kontrol et veya yerel MP3 seç."
                         }
                     }
