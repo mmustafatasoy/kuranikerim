@@ -137,12 +137,36 @@ internal fun ReferenceSurahListScreen(repo:QuranRepository,onOpen:(Int)->Unit,
 }
 
 @Composable
-internal fun ReferenceAppSettings(dark:Boolean,onTheme:()->Unit) {
+internal fun ReferenceAppSettings(
+    dark:Boolean,
+    onTheme:()->Unit,
+    onCheckUpdates:()->Unit = {}
+) {
     Column(Modifier.fillMaxSize().background(RefPaper)) {
         RefTopBar("Ayarlar","Uygulama tercihleri")
         Row(Modifier.fillMaxWidth().padding(17.dp),verticalAlignment=Alignment.CenterVertically) {
             Text("Koyu ana ekran teması",modifier=Modifier.weight(1f),color=RefDark)
             Switch(checked=dark,onCheckedChange={onTheme()})
+        }
+        HorizontalDivider()
+        Surface(
+            onClick = onCheckUpdates,
+            color = Color.White,
+            shape = RoundedCornerShape(15.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            Row(Modifier.fillMaxWidth().padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.SystemUpdate, "Güncellemeleri kontrol et", tint = RefGreen)
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("Güncellemeleri kontrol et",
+                        fontWeight = FontWeight.Bold, color = RefDark)
+                    Text("GitHub Releases • NUR yeni sürümleri",
+                        fontSize = 12.sp, color = Color.Gray)
+                }
+                Icon(Icons.Default.ChevronRight, null, tint = RefGreen)
+            }
         }
         HorizontalDivider()
         Text("Arapça yazı, meal ve ses ayarları sure okunurken sağ üstteki ayar düğmesinde.",
