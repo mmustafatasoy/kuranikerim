@@ -6,8 +6,8 @@ import org.junit.Test
 class ArabicLetterTimelineTest {
     @Test fun combinesMarksWithTheirArabicLetter() {
         val glyphs = ArabicLetterTimeline.glyphs("إِلَٰهِ النَّاسِ")
-        assertEquals(listOf("إِ", "لَٰ", "هِ", "ا", "لنَّ", "ا", "سِ"), glyphs.map { it.text })
-        assertEquals(listOf(0,0,0,1,1,1,1), glyphs.map { it.wordIndex })
+        assertEquals(listOf("إِ", "لَٰ", "هِ", "ا", "ل", "نَّ", "ا", "سِ"), glyphs.map { it.text })
+        assertEquals(listOf(0,0,0,1,1,1,1,1), glyphs.map { it.wordIndex })
     }
 
     @Test fun handlesBasmalaAndQuranicMarksWithoutErasingThem() {

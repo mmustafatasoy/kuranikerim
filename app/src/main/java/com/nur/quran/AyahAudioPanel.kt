@@ -43,11 +43,13 @@ fun AyahAudioPanel(
     reciterId: String = "ar.alafasy",
     autoNext: Boolean = true,
     onSettings: () -> Unit = {},
-    onLocalAudio: () -> Unit = {}
+    onLocalAudio: () -> Unit = {},
+    onAudioClock: (VerseAudioClock) -> Unit = {}
 ) {
     val context = LocalContext.current
     val currentAyahCallback by rememberUpdatedState(onAyahChanged)
     val playingCallback by rememberUpdatedState(onPlayingChanged)
+    val clockCallback by rememberUpdatedState(onAudioClock)
     var controller by remember(surah.number) { mutableStateOf<MediaController?>(null) }
     var isPlaying by remember(surah.number) { mutableStateOf(false) }
     var currentAyah by remember(surah.number) { mutableIntStateOf(0) }
@@ -65,7 +67,7 @@ fun AyahAudioPanel(
         repeating = player.repeatMode == Player.REPEAT_MODE_ONE
         val key = player.currentMediaItem?.mediaId ?: return
         val parts = key.split(":")
-        val ayah = if(parts.size==2 && parts[0]==surah.number.toString())
+        val ayah = if(parts.size>=2 && parts[0]==surah.number.toString())
             parts[1].toIntOrNull() else null
         if(ayah!=null && ayah in 1..surah.ayahCount) {
             currentAyah = ayah
@@ -148,8 +150,19 @@ fun AyahAudioPanel(
                 val d=p.duration
                 durationMs=if(d==C.TIME_UNSET||d<1L)0L else d
                 positionMs=p.currentPosition.coerceAtLeast(0L)
+                val idParts=p.currentMediaItem?.mediaId?.split(":").orEmpty()
+                val currentNumber=if(idParts.size>=2 && idParts[0]==surah.number.toString())
+                    idParts[1].toIntOrNull() ?: 0 else 0
+                val currentReciter=if(idParts.size==3)idParts[2] else ""
+                clockCallback(
+                    VerseAudioClock(
+                        surah=surah.number, ayah=currentNumber,
+                        reciter=currentReciter, positionMs=positionMs,
+                        durationMs=durationMs, isPlaying=p.isPlaying
+                    )
+                )
             }
-            delay(400)
+            delay(if(p?.isPlaying==true) 70L else 250L)
         }
     }
 
