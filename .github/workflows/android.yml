@@ -27,6 +27,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify Quran data
         run: python3 scripts/validate_data.py
+      - name: Verify verse-by-verse QuranEnc meal
+        run: python3 scripts/check_quranenc_meal.py
       - name: Build debug APK
         run: bash gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
